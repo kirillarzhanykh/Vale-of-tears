@@ -53,12 +53,15 @@ int main(int argc, char* argv[]){
     Res = new double[n];
 
     clock_t start = clock();
-    solver(n, M_copy, b_copy, Res);
+    if(solver(n, M_copy, b_copy, Res) == -1){
+        std::cout << "Матрица вырождена!" << std::endl;
+        return 0;
+    }
     clock_t end = clock();
     double seconds =  static_cast<double>(end - start) / CLOCKS_PER_SEC;
 
 
-    //matrix_writer(n, n, m, M);
+    matrix_writer(n, n, m, M);
     matrix_writer(n, 1, m, Res);
     std::cout << "\n";
     std::cout << "Норма невязки (относительная): " << relative_norm(n, Res, Res_Real) << std::endl;

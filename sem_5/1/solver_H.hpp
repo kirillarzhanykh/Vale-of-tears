@@ -1,14 +1,17 @@
+#define EPS 0.000001
 
 int solver(int n, double* A, double* b, double* x){
     double buf, buf2;
     int num = 0;
     for(int i = 0; i < n; i++){
         buf = 0;
-
+        num = i;
         //Выбираем строку с максимальным первым элементом
         for(int j = i; j < n ; j++){
-            if(abs(A[j * n + i]) > buf) buf = abs(A[j * n + i]);
-            num = j; 
+            if(A[j * n + i] * A[j * n + i] > buf){
+                buf = A[j * n + i] * A[j * n + i];
+                num = j; 
+            }
         }
 
         //Переносим эту строку наверх
@@ -37,6 +40,7 @@ int solver(int n, double* A, double* b, double* x){
         for(int j = n - 1; j > i; j--){
             x[i] -= x[j] * A[i * n + j];
         }
+        if(A[i * n + i] < EPS && A[i * n + i] > -EPS) return -1;
         x[i] = x[i] / A[i * n + i];
     }
 

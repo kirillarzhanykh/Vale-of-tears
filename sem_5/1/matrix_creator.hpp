@@ -39,7 +39,7 @@ int matrix_creator(int n, int k, char* filename, double* matrix){
     if(k == 4){
         for(int i = 0; i < n; i++){
             for(int j = 0; j < n; j++){
-                matrix[i * n + j] = 1.0 / ( i + j + 3);
+                matrix[i * n + j] = 1.0 / (i + j + 1);
             }
         }
     }
