@@ -1,4 +1,4 @@
-#define EPS 0.000001
+#define EPS 10e-17
 
 int solver(int n, double* A, double* b, double* x){
     double buf, buf2;
@@ -13,6 +13,7 @@ int solver(int n, double* A, double* b, double* x){
                 num = j; 
             }
         }
+        if(A[num * n + i] < EPS && A[num * n + i] > -EPS) return -1;
 
         //Переносим эту строку наверх
         for(int j = i; j < n ; j++){
@@ -40,7 +41,6 @@ int solver(int n, double* A, double* b, double* x){
         for(int j = n - 1; j > i; j--){
             x[i] -= x[j] * A[i * n + j];
         }
-        if(A[i * n + i] < EPS && A[i * n + i] > -EPS) return -1;
         x[i] = x[i] / A[i * n + i];
     }
 

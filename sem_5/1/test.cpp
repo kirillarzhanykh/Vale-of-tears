@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstring>
-#include "matrix_creator.hpp"
-#include "solver_H.hpp"
+#include "matrix_creator.h"
+#include "solver_H.h"
 #include <random>
 #include <time.h>
 
@@ -30,7 +30,10 @@ int main(int argc, char* argv[]){
 
     double* M;
     M = new double[n*n];
-    matrix_creator(n, k, filename, M);
+    if(matrix_creator(n, k, filename, M) != 0){ 
+        delete[] M;
+        return 0;
+    }
     double* M_copy;
     M_copy = new double[n*n];
     copy_filler(n*n, M, M_copy);
@@ -55,18 +58,17 @@ int main(int argc, char* argv[]){
     clock_t start = clock();
     if(solver(n, M_copy, b_copy, Res) == -1){
         std::cout << "Матрица вырождена!" << std::endl;
-        return 0;
+    } else {
+        clock_t end = clock();
+        double seconds =  static_cast<double>(end - start) / CLOCKS_PER_SEC;
+
+        matrix_writer(n, n, m, M);
+        matrix_writer(n, 1, m, Res);
+        std::cout << "\n";
+        std::cout << "Норма невязки (относительная): " << relative_norm(n, Res, Res_Real) << std::endl;
+        std::cout << "\n";
+        std::cout << "Время решения системы: " << seconds << " сек" << std::endl;
     }
-    clock_t end = clock();
-    double seconds =  static_cast<double>(end - start) / CLOCKS_PER_SEC;
-
-
-    matrix_writer(n, n, m, M);
-    matrix_writer(n, 1, m, Res);
-    std::cout << "\n";
-    std::cout << "Норма невязки (относительная): " << relative_norm(n, Res, Res_Real) << std::endl;
-    std::cout << "\n";
-    std::cout << "Время решения системы: " << seconds << " сек" << std::endl;
     delete[] M;
     delete[] M_copy;
     delete[] b;
@@ -78,12 +80,11 @@ int main(int argc, char* argv[]){
 
 
 int matrix_writer(int a, int b, int m, double* matrix){
-    int z;
     for(int i = 0; i < std::min(m, a); i++){
         std::cout << "\n";
         for(int j = 0; j < std::min(m, b); j++){
-            z = matrix[i * b + j] * 1000;
-            std::cout << z << "%10.3e   ";
+            std::cout.precision(3);
+            std::cout << matrix[i * b + j] << "   ";
         }
         std::cout << "\n";   
     } 
