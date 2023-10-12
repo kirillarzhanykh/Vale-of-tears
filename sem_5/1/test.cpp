@@ -19,6 +19,7 @@ int main(int argc, char* argv[]){
    
     if (argc < 4){
         std::cout << "дурак" << std::endl;
+        return 0;
     } 
     int n = atoi(argv[1]);
     int m = atoi(argv[2]);
