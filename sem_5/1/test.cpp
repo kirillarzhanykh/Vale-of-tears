@@ -72,7 +72,7 @@ int main(int argc, char* argv[]){
         std::cout << "\n";
         std::cout << "Норма невязки (относительная): " << relative_norm(n, Res, Res_Real) << std::endl;
         std::cout << "\n";
-	std::cout << "Норма погрешности: " << norm(n, Raznost) << std::endl;
+	    std::cout << "Норма погрешности: " << norm(n, Raznost) << std::endl;
         std::cout << "\n";
         std::cout << "Время решения системы: " << seconds << " сек" << std::endl;
     }
