@@ -55,6 +55,8 @@ int main(int argc, char* argv[]){
 
     double* Res;
     Res = new double[n];
+    double* Raznost;
+    Raznost = new double[n];
 
     clock_t start = clock();
     if(solver(n, M_copy, b_copy, Res) == -1){
@@ -62,14 +64,19 @@ int main(int argc, char* argv[]){
     } else {
         clock_t end = clock();
         double seconds =  static_cast<double>(end - start) / CLOCKS_PER_SEC;
-
+	for(int i = 0; i < n;i++){
+		Raznost[i] = Res[i] - Res_Real[i];
+	}
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
         std::cout << "\n";
         std::cout << "Норма невязки (относительная): " << relative_norm(n, Res, Res_Real) << std::endl;
         std::cout << "\n";
+	std::cout << "Норма погрешности: " << norm(n, Raznost) << std::endl;
+        std::cout << "\n";
         std::cout << "Время решения системы: " << seconds << " сек" << std::endl;
     }
+	delete[] Raznost;
     delete[] M;
     delete[] M_copy;
     delete[] b;

@@ -1,8 +1,9 @@
-#define EPS 10e-17
+#define EPS 10e-15
 
 int solver(int n, double* A, double* b, double* x){
     double buf, buf2;
     int num = 0;
+
     for(int i = 0; i < n; i++){
         buf = 0;
         num = i;
@@ -34,6 +35,7 @@ int solver(int n, double* A, double* b, double* x){
             }
             b[j] -= b[i] * buf2;
         }
+
     }
 
     for(int i = n - 1; i >= 0; i--){
