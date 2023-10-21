@@ -15,6 +15,7 @@ int solver(int n, double* A, double* b, double* x){
         }
         buf += buf2;
     }
+    if (buf <= 0) return -1;
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
             A[i * n + j] = A[i * n + j] / buf;
