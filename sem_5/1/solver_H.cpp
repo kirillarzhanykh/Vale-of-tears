@@ -1,8 +1,29 @@
-#define EPS 10e-15
+#include "solver_H.h"
+#include <iostream>
+#include <cmath>
+#define EPS 10e-17
 
 int solver(int n, double* A, double* b, double* x){
-    double buf, buf2;
+    long double buf, buf2;
     int num = 0;
+    // Нормируем матрицу
+    buf = 0;
+    for(int i = 0; i < n; i++){
+        buf2 = 0;
+        for(int j = 0; j < n; j++){
+            if(fabs(A[i * n + j]) > buf2) buf2 = fabs(A[i * n + j]);
+        }
+        buf += buf2;
+    }
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            A[i * n + j] = A[i * n + j] / buf;
+        }
+    }
+    for(int i = 0; i < n; i++){
+        b[i] = b[i] / buf;
+    }
+
 
     for(int i = 0; i < n; i++){
         buf = 0;
@@ -35,7 +56,6 @@ int solver(int n, double* A, double* b, double* x){
             }
             b[j] -= b[i] * buf2;
         }
-
     }
 
     for(int i = n - 1; i >= 0; i--){

@@ -64,13 +64,19 @@ int main(int argc, char* argv[]){
     } else {
         clock_t end = clock();
         double seconds =  static_cast<double>(end - start) / CLOCKS_PER_SEC;
-	for(int i = 0; i < n;i++){
-		Raznost[i] = Res[i] - Res_Real[i];
-	}
+        for(int i = 0; i < n; i++){
+            Raznost[i] = Res[i] - Res_Real[i];
+        }
+        for(int i = 0; i < n; i++){
+            b_copy[i] = 0;
+            for(int j = 0; j < n; j++){
+                b_copy[i] += Res[j] * M[i * n + j];
+            }
+        }
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
         std::cout << "\n";
-        std::cout << "Норма невязки (относительная): " << relative_norm(n, Res, Res_Real) << std::endl;
+        std::cout << "Норма невязки (относительная): " << relative_norm(n, b_copy, b) << std::endl;
         std::cout << "\n";
 	    std::cout << "Норма погрешности: " << norm(n, Raznost) << std::endl;
         std::cout << "\n";
