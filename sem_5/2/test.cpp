@@ -17,11 +17,11 @@ int main(int argc, char* argv[]){
     } 
     int n = atoi(argv[1]);
     int m = atoi(argv[2]);
-    int eps = atol(argv[3]);
+    double eps = atof(argv[3]);
     int k = atoi(argv[4]);
     char filename[20];
-    if(argc == 5){
-        strcpy(filename, argv[4]);
+    if(argc == 6){
+        strcpy(filename, argv[5]);
     }
 
     double* M;
