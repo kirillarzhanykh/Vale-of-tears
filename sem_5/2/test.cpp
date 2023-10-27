@@ -37,8 +37,13 @@ int main(int argc, char* argv[]){
     double* Res;
     Res = new double[n];
 
+    double* Mem1;
+    Mem1 = new double[n*n];
+    double* Mem2;
+    Mem2 = new double[n*n];
+
     clock_t start = clock();
-    if(eigenvalues(n, M_copy, Res, eps) == -1){
+    if(eigenvalues(n, M_copy, Mem1, Mem2, Res, eps) == -1){
         std::cout << "Матрица вырождена!" << std::endl;
     } else {
         clock_t end = clock();
@@ -73,6 +78,8 @@ int main(int argc, char* argv[]){
     }
     delete[] M;
     delete[] M_copy;
+    delete[] Mem1;
+    delete[] Mem2;
     delete[] Res;
     return 0;
 }

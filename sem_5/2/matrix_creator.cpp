@@ -34,7 +34,6 @@ int matrix_reader(int n, double* matrix, char* filename){
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             input >> matrix[i * n + j];
-            std::cout << matrix[i * n +j];
             if(input.eof()) return -1;
         }
     }
