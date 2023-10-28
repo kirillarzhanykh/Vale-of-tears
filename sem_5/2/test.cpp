@@ -41,7 +41,13 @@ int main(int argc, char* argv[]){
     Mem1 = new double[n*n];
     double* Mem2;
     Mem2 = new double[n*n];
-
+	for(int i = 0; i < n * n; i++){
+		Mem1[i]=0;
+		Mem2[i]=0;
+	}
+	for(int i = 0; i < n; i++){
+		Res[i] =0;
+	}
     clock_t start = clock();
     if(eigenvalues(n, M_copy, Mem1, Mem2, Res, eps) == -1){
         std::cout << "Матрица вырождена!" << std::endl;
@@ -75,7 +81,7 @@ int main(int argc, char* argv[]){
         std::cout << "\n";
 	    std::cout << "Невязка во втором инварианте: " << abs(lenght_M - sum2) << std::endl;
         std::cout << "\n";
-        std::cout << "Время решения системы: " << seconds << " сек" << std::endl;
+        std::cout << "Время поиска собственных значений: " << seconds << " сек" << std::endl;
     }
     delete[] M;
     delete[] M_copy;

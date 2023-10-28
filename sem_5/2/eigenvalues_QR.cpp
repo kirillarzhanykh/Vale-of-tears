@@ -107,7 +107,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             for(int j = 0; j < n; j++){
                 A[i * n + j] = 0;
                 for(int k = 0; k < n; k++){
-                    A[i * n + j] += B[i * n + k] * C[k * n + j];
+                    A[i * n + j] += C[i * n + k] * B[k * n + j];
                 }
             }
         }
