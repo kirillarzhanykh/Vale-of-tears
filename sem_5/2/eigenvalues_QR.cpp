@@ -1,49 +1,47 @@
 #include "eigenvalues_QR.h"
 
 int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, double eps){
-
-    int flag = 1;
-    double sum = 0.0; // s_k
-    double aNorm = 0.0; // ||a_1ˆ(k-1)||
-    double xNorm = 0.0; // ||xˆ(k)||
-    double Uk = 0.0; // U(x)
+    /*
+    double sum = 0; // s_k
+    double aNorm = 0; // ||a_1ˆ(k-1)||
+    double xNorm = 0; // ||xˆ(k)||
+    double Uk = 0; // U(x)
     
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
-            B[i*n + j] = (i == j)*1.0;
+            B[i * n + j] = (i == j);
         }
     }
     
     for(int k = 0; k < n; k++){
         
-        sum = 0.0;
+        sum = 0;
         
         for(int j = k + 1; j < n ;  j++  ){
-            sum += A[j*n + k] * A[j*n + k];
+            sum += A[j * n + k] * A[j * n + k];
         }
       
-        aNorm = std::sqrt(A[k*n + k]*A[k*n + k] + sum);
+        aNorm = std::sqrt(A[k * n + k] * A[k * n + k] + sum);
         
         if(aNorm < 1e-100 ){
             return -1;
         }
         
-        A[k*n + k] -= aNorm;
+        A[k * n + k] -= aNorm;
         
-        xNorm = std::sqrt((A[k*n + k])*(A[k*n + k]) + sum);
+        xNorm = std::sqrt((A[k * n + k]) * (A[k * n + k]) + sum);
         
         if (xNorm < 1e-100)
         {
             A[k * n + k] += aNorm;
-            continue;
         }
         
         for(int j = k; j < n; j++){
-            A[j*n + k] = 1.0 * A[j*n + k] / xNorm;
+            A[j * n + k] = 1.0 * A[j * n + k] / xNorm;
         }
         
-        for(int i = k; i < n;i++){
-            Uk = 0.0;
+        for(int i = k; i < n; i++){
+            Uk = 0;
             for(int j = k; j < n; j++){
                 Uk += A[j * n + k] * A[j * n + i];
             }
@@ -52,9 +50,9 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             }
         }
         
-        for (int i = 0; i < n; i++ )
+        for (int i = 0; i < n; i++)
         {
-            Uk = 0.0;
+            Uk = 0;
             for (int j = k; j < n; j++){
                 Uk += A[j * n + k] * B[j * n + i];
             }
@@ -66,25 +64,44 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         
         A[k * n + k] = aNorm;
     }
+    */
     
-    //double x, y, cos, sin;
+    int flag = 1;
+    double x, y, cos, sin, buf;
 
     for(int m = 0; m < 100; m++){
-        /*
+
         for(int i = 0; i < n; i++){
-            for(int j = i; j < n; j++){
+            for(int j = 0; j < n; j++){
+                B[i * n + j] = (i == j);
+            }
+        }
+    
+        for(int i = 0; i < n; i++){
+            for(int j = i + 1; j < n; j++){
                 x = A[i * n + i];
                 y = A[j * n + i];
                 if( x * x + y * y > 0 ){
                     cos = x / std::sqrt(x * x + y * y);
                     sin = y / std::sqrt(x * x + y * y);
                     for(int k = 0; k < n; k++){
-                        A[]
+                        buf = A[i * n + k];
+                        A[i * n + k] = buf * cos - A[j * n + k] * sin;
+                        A[j * n + k] = buf * sin + A[j * n + k] * cos;
+
+                        buf = B[i * n + k];
+                        B[i * n + k] = buf * cos - B[j * n + k] * sin;
+                        B[j * n + k] = buf * sin + B[j * n + k] * cos; 
                     }
                 }
             }
         }
 
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                C[i * n + j] = A[i * n + j];
+            }
+        }
 
         for(int i = 0; i < n; i++){
             for(int j = 0; j < n; j++){
@@ -94,7 +111,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                 }
             }
         }
-        */
+    
         flag = 1;
 
         for(int i = 0; i < n; i++){

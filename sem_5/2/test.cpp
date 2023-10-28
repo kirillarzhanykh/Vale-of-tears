@@ -68,6 +68,7 @@ int main(int argc, char* argv[]){
         }
 
         matrix_writer(n, n, m, M);
+        matrix_writer(n, n, m, M_copy);
         matrix_writer(n, 1, m, Res);
         std::cout << "\n";
         std::cout << "Невязка в первом инварианте: " << abs(trace_M - sum1) << std::endl;
