@@ -42,12 +42,13 @@ int main(int argc, char* argv[]){
     double* Mem2;
     Mem2 = new double[n*n];
 	for(int i = 0; i < n * n; i++){
-		Mem1[i]=0;
-		Mem2[i]=0;
+		Mem1[i] = 0;
+		Mem2[i] = 0;
 	}
 	for(int i = 0; i < n; i++){
-		Res[i] =0;
+		Res[i] = 0;
 	}
+
     clock_t start = clock();
     if(eigenvalues(n, M_copy, Mem1, Mem2, Res, eps) == -1){
         std::cout << "Матрица вырождена!" << std::endl;
