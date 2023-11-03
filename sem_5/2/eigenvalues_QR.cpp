@@ -9,11 +9,11 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
     
     //В этом блоке B выступает хранилищем вектора отражения
 
-    for(int k = 0; k < n; k++){
+    for(int k = 0; k < n - 2; k++){
         
         sum = 0;
         
-        for(int j = k; j < n; j++){
+        for(int j = k + 1; j < n; j++){
             sum += A[j * n + k] * A[j * n + k];
         }
       
@@ -23,15 +23,16 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             return -1;
         }
         
-        xNorm = std::sqrt(sum - A[k * n + k] * A[k * n + k] + (A[k * n + k] - aNorm) * (A[k * n + k] - aNorm));
+        xNorm = std::sqrt(sum - A[(k + 1)* n + k] * A[(k + 1)* n + k] + (A[(k + 1)* n + k] - aNorm) * (A[(k + 1)* n + k] - aNorm));
         
         if (xNorm < 1e-100)
         {
             return -1;
         }
 
-        B[k] = (A[k * n + k] - aNorm) / xNorm;
-        for(int j = k + 1; j < n; j++){
+        B[k] = 0;
+        B[k + 1] = (A[(k + 1) * n + k] - aNorm) / xNorm;
+        for(int j = k + 2; j < n; j++){
             B[j] = A[j * n + k] / xNorm;
         }
         
@@ -47,7 +48,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         }
 
         //Умножение на матрицу отражения справа
-        /*
+        
         for(int i = k; i < n; i++){
             ScalProduct = 0;
             for(int j = k; j < n; j++){
@@ -57,11 +58,10 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                 A[i * n + j] -= 2 * ScalProduct * B[j];
             }
         }
-        */
+        
         
     }
     /*
-    
     int flag = 1;
     double x, y, cos, sin, buf;
 
@@ -110,8 +110,8 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
     
         flag = 1;
 
-        for(int i = 0; i < n; i++){
-            if(fabs(EigenValues[i] - A[i * n + i]) > eps) flag = 0;
+        for(int i = 0; i < n - 1; i++){
+            if(fabs(A[(i + 1) * n + i]) > eps) flag = 0;
         }
 
         if(flag == 1) return 0;
@@ -121,5 +121,6 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         }
     }
     */
+    
     return 0;
 }
