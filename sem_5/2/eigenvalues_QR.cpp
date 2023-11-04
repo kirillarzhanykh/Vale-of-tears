@@ -73,25 +73,25 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
-                B[i * n_Var + j] = (i == j);
+                B[i * n + j] = (i == j);
             }
         }
     
         for(int i = 0; i < n_Var; i++){
             for(int j = i + 1; j < n_Var; j++){
-                x = A[i * n_Var + i];
-                y = A[j * n_Var + i];
+                x = A[i * n + i];
+                y = A[j * n + i];
                 if( x * x + y * y > 0 ){
                     cos = x / std::sqrt(x * x + y * y);
                     sin = - y / std::sqrt(x * x + y * y);
                     for(int k = 0; k < n_Var; k++){
-                        buf = A[i * n_Var + k];
-                        A[i * n_Var + k] = buf * cos - A[j * n_Var + k] * sin;
-                        A[j * n_Var + k] = buf * sin + A[j * n_Var + k] * cos;
+                        buf = A[i * n + k];
+                        A[i * n + k] = buf * cos - A[j * n + k] * sin;
+                        A[j * n + k] = buf * sin + A[j * n + k] * cos;
 
-                        buf = B[k * n_Var + i];
-                        B[k * n_Var + i] = buf * cos - B[k * n_Var + j] * sin;
-                        B[k * n_Var + j] = buf * sin + B[k * n_Var + j] * cos; 
+                        buf = B[k * n + i];
+                        B[k * n + i] = buf * cos - B[k * n + j] * sin;
+                        B[k * n + j] = buf * sin + B[k * n + j] * cos; 
                     }
                 }
             }
@@ -99,15 +99,15 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
      
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
-                C[i * n_Var + j] = A[i * n_Var + j];
+                C[i * n + j] = A[i * n + j];
             }
         }
 
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
-                A[i * n_Var + j] = 0;
+                A[i * n + j] = 0;
                 for(int k = 0; k < n_Var; k++){
-                    A[i * n_Var + j] += C[i * n_Var + k] * B[k * n_Var + j];
+                    A[i * n + j] += C[i * n + k] * B[k * n + j];
                 }
             }
         }
@@ -115,7 +115,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         flag = 1;
 
         for(int i = 1; i < n_Var; i++){
-            if(fabs(A[i * n_Var + i - 1]) > eps) flag = 0;
+            if(fabs(A[i * n + i - 1]) > eps) flag = 0;
         }
 
         if(flag == 1){
@@ -123,13 +123,13 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         }
 
         for(int i = 0; i < n_Var; i++){
-            EigenValues[i] = A[i * n_Var + i];
+            EigenValues[i] = A[i * n + i];
         }
 
-        //if(fabs(A[(n_Var - 1) * (n_Var + 1) - 1]) < eps){
-            //EigenValues[n_Var - 1] = A[(n_Var - 1) * n_Var + (n_Var - 1)];
-            //n_Var--;
-        //}
+        if(fabs(A[(n_Var - 1) * n + (n_Var - 1)]) < eps){
+            EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
+            n_Var--;
+        }
         
     }
     
