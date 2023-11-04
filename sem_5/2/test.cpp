@@ -74,15 +74,15 @@ int main(int argc, char* argv[]){
             sum2 += Res[i] * Res[i];
         }
 
+        std::cout << "\n" << "Данная матрица: " << std::endl;
         matrix_writer(n, n, m, M);
+        std::cout << "\n" << "Матрица после преобразований: " << std::endl;
         matrix_writer(n, n, m, M_copy);
+        std::cout << "\n" << "Вектор собственных чисел: " << std::endl;
         matrix_writer(n, 1, m, Res);
-        std::cout << "\n";
-        std::cout << "Невязка в первом инварианте: " << abs(trace_M - sum1) << std::endl;
-        std::cout << "\n";
-	    std::cout << "Невязка во втором инварианте: " << abs(lenght_M - sum2) << std::endl;
-        std::cout << "\n";
-        std::cout << "Время поиска собственных значений: " << seconds << " сек" << std::endl;
+        std::cout << "\n" << "Невязка в первом инварианте: " << abs(trace_M - sum1) << std::endl;
+	    std::cout << "\n" << "Невязка во втором инварианте: " << abs(lenght_M - sum2) << std::endl;
+        std::cout << "\n" << "Время поиска собственных значений: " << seconds << " сек" << std::endl;
     }
     delete[] M;
     delete[] M_copy;
