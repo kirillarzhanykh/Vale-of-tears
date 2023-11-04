@@ -27,7 +27,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         
         if (xNorm < 1e-100)
         {
-            return -1;
+            continue;
         }
 
         B[k] = 0;
@@ -61,7 +61,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         
         
     }
-    /*
+    
     int flag = 1;
     double x, y, cos, sin, buf;
 
@@ -79,20 +79,20 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                 y = A[j * n + i];
                 if( x * x + y * y > 0 ){
                     cos = x / std::sqrt(x * x + y * y);
-                    sin = y / std::sqrt(x * x + y * y);
+                    sin = - y / std::sqrt(x * x + y * y);
                     for(int k = 0; k < n; k++){
                         buf = A[i * n + k];
                         A[i * n + k] = buf * cos - A[j * n + k] * sin;
                         A[j * n + k] = buf * sin + A[j * n + k] * cos;
 
-                        buf = B[i * n + k];
-                        B[i * n + k] = buf * cos - B[j * n + k] * sin;
-                        B[j * n + k] = buf * sin + B[j * n + k] * cos; 
+                        buf = B[k * n + i];
+                        B[k * n + i] = buf * cos - B[k * n + j] * sin;
+                        B[k * n + j] = buf * sin + B[k * n + j] * cos; 
                     }
                 }
             }
         }
-
+     
         for(int i = 0; i < n; i++){
             for(int j = 0; j < n; j++){
                 C[i * n + j] = A[i * n + j];
@@ -107,6 +107,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                 }
             }
         }
+        
     
         flag = 1;
 
@@ -114,13 +115,15 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             if(fabs(A[(i + 1) * n + i]) > eps) flag = 0;
         }
 
-        if(flag == 1) return 0;
+        if(flag == 1){
+            return 0;
+        }
         
         for(int i = 0; i < n; i++){
             EigenValues[i] = A[i * n + i];
         }
+         
     }
-    */
     
     return 0;
 }
