@@ -2,10 +2,10 @@
 
 int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, double eps){
     
-    double sum; // s_k
-    double aNorm; // ||a_1ˆ(k-1)||
-    double xNorm; // ||xˆ(k)||
-    double ScalProduct; // U(x)
+    double sum;
+    double aNorm;
+    double xNorm;
+    double ScalProduct; 
     
     //В этом блоке B выступает хранилищем вектора отражения
 
@@ -19,13 +19,13 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
       
         aNorm = std::sqrt(sum);
         
-        if(aNorm < 1e-100 ){
-            return -1;
+        if(aNorm < 1e-50){
+            continue;
         }
         
-        xNorm = std::sqrt(sum - A[(k + 1)* n + k] * A[(k + 1)* n + k] + (A[(k + 1)* n + k] - aNorm) * (A[(k + 1)* n + k] - aNorm));
+        xNorm = std::sqrt(sum - A[(k + 1) * n + k] * A[(k + 1) * n + k] + (A[(k + 1) * n + k] - aNorm) * (A[(k + 1)* n + k] - aNorm));
         
-        if (xNorm < 1e-100)
+        if (xNorm < 1e-50)
         {
             continue;
         }
@@ -59,8 +59,6 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                 A[i * n + j] -= 2 * ScalProduct * B[j];
             }
         }
-        
-        
     }
     
     int flag = 1;
@@ -69,20 +67,16 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
     //В этом блоке B и C используются для хранения разложения
 
-    for(int m = 0; m < 500; m++){
+    for(int m = 0; m < 1000; m++){
+
+        // Подготовительная часть (строим единичную матрицу, зануляем псевдонули)
 
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
                 B[i * n + j] = (i == j);
-            }
-        }
-
-        for(int i = 0; i < n_Var; i++){
-            for(int j = 0; j < n_Var; j++){
                 if(fabs(A[i * n + j]) < 1e-50) A[i * n + j] = 0;
             }
         }
-
 
         //Сдвиг
 
@@ -132,6 +126,10 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         for(int i = 0; i < n_Var; i++){
             A[i * n + i] += shift;
         }
+
+        for(int i = 0; i < n_Var; i++){
+            EigenValues[i] = A[i * n + i];
+        }
         
         flag = 1;
 
@@ -139,13 +137,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             if(fabs(A[i * n + i - 1]) > eps) flag = 0;
         }
 
-        if(flag == 1){
-            return 0;
-        }
-
-        for(int i = 0; i < n_Var; i++){
-            EigenValues[i] = A[i * n + i];
-        }
+        if(flag == 1) return 0;
 
         //Исчерпывание
 
@@ -156,5 +148,6 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         
     }
     
-    return 0;
+    n_Var--;
+    return n_Var;
 }

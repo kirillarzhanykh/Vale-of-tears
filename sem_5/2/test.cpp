@@ -24,6 +24,11 @@ int main(int argc, char* argv[]){
         strcpy(filename, argv[5]);
     }
 
+    if(m > n){
+        std::cout << "подумай ещё" << std::endl;
+        return 0;
+    }
+
     double* M;
     M = new double[n*n];
     if(matrix_creator(n, k, filename, M) != 0){ 
@@ -49,11 +54,13 @@ int main(int argc, char* argv[]){
 		Res[i] = 0;
 	}
 
+    int flag;
     clock_t start = clock();
-    if(eigenvalues(n, M_copy, Mem1, Mem2, Res, eps) == -1){
-        std::cout << "Матрица вырождена!" << std::endl;
+    flag = eigenvalues(n, M_copy, Mem1, Mem2, Res, eps);
+    clock_t end = clock();
+    if(flag == -1){    //Да, этот случай невозможен, ещё вопросы?
+        std::cout << "Ошибка!" << std::endl; 
     } else {
-        clock_t end = clock();
         double seconds =  static_cast<double>(end - start) / CLOCKS_PER_SEC;
 
         double trace_M = 0;
@@ -65,9 +72,9 @@ int main(int argc, char* argv[]){
             sum1 += Res[i];
         }
 
-        double lenght_M = 0;
+        double length_M = 0;
         for(int i = 0; i < n*n; i++){
-            lenght_M += M[i] * M[i];
+            length_M += M[i] * M[i];
         }
         double sum2 = 0;
         for(int i = 0; i < n; i++){
@@ -78,10 +85,39 @@ int main(int argc, char* argv[]){
         matrix_writer(n, n, m, M);
         std::cout << "\n" << "Матрица после преобразований: " << std::endl;
         matrix_writer(n, n, m, M_copy);
-        std::cout << "\n" << "Вектор собственных чисел: " << std::endl;
-        matrix_writer(n, 1, m, Res);
+
+        if(flag > 2){
+            std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;
+            std::cout << "\n" << "Вектор из чисел на диагонали: " << std::endl;
+            for(int i = 0; i < m; i++){
+                std::cout << "\n" << Res[i] << "\n";
+            }
+        } else if(flag == 2){
+            double a11 = M_copy[0];
+            double a12 = M_copy[1];
+            double a21 = M_copy[n];
+            double a22 = M_copy[n + 1];
+            double b = - (a11 + a22); 
+            double c = a11 * a22 - a21 * a12;
+            double R_P = - b / 2;
+            double Im_P = std::sqrt(4 * c - b * b) / 2;
+            std::cout << "\n" << "Вектор собственных чисел: " << std::endl;
+            std::cout.precision(3);
+            std::cout << "\n" << R_P << " + i * " << Im_P << "\n";
+            std::cout << "\n" << R_P << " - i * " << Im_P << "\n";
+            for(int i = flag; i < n; i++){
+                std::cout << "\n" << Res[i] << "\n";
+            }
+            length_M -=  M_copy[0] *  M_copy[0];
+            length_M -=  M_copy[n + 1] *  M_copy[n + 1];
+            length_M += R_P * R_P;
+            length_M += Im_P * Im_P;
+        } else {
+            std::cout << "\n" << "Вектор собственных чисел: " << std::endl;
+            matrix_writer(n, 1, m, Res);
+        }
         std::cout << "\n" << "Невязка в первом инварианте: " << abs(trace_M - sum1) << std::endl;
-	    std::cout << "\n" << "Невязка во втором инварианте: " << abs(lenght_M - sum2) << std::endl;
+	    std::cout << "\n" << "Невязка во втором инварианте: " << abs(length_M - sum2) << std::endl;
         std::cout << "\n" << "Время поиска собственных значений: " << seconds << " сек" << std::endl;
     }
     delete[] M;
