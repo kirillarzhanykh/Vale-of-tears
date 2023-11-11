@@ -77,6 +77,13 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             }
         }
 
+        for(int i = 0; i < n_Var; i++){
+            for(int j = 0; j < n_Var; j++){
+                if(fabs(A[i * n + j]) < 1e-50) A[i * n + j] = 0;
+            }
+        }
+
+
         //Сдвиг
 
         shift = A[(n_Var - 1) * n + (n_Var - 1)] * 1.3;
