@@ -19,13 +19,13 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
       
         aNorm = std::sqrt(sum);
         
-        if(aNorm < 1e-50){
+        if(aNorm < 1e-20){
             continue;
         }
         
         xNorm = std::sqrt(sum - A[(k + 1) * n + k] * A[(k + 1) * n + k] + (A[(k + 1) * n + k] - aNorm) * (A[(k + 1)* n + k] - aNorm));
         
-        if (xNorm < 1e-50)
+        if (xNorm < 1e-20)
         {
             continue;
         }
@@ -74,7 +74,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
                 B[i * n + j] = (i == j);
-                if(fabs(A[i * n + j]) < 1e-50) A[i * n + j] = 0;
+                if(fabs(A[i * n + j]) < 1e-20) A[i * n + j] = 0;
             }
         }
 
@@ -116,7 +116,9 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             for(int j = 0; j < n_Var; j++){
                 A[i * n + j] = 0;
                 for(int k = 0; k < n_Var; k++){
-                    A[i * n + j] += C[i * n + k] * B[k * n + j];
+                    if(fabs(B[k * n + j]) > 1e-20 && fabs(C[i * n + k]) > 1e-20){
+                        A[i * n + j] += C[i * n + k] * B[k * n + j];
+                    }
                 }
             }
         }
