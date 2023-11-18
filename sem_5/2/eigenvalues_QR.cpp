@@ -1,5 +1,4 @@
 #include "eigenvalues_QR.h"
-#include <iostream>
 
 int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, double eps){
     
@@ -12,9 +11,6 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
     for(int k = 0; k < n - 2; k++){
 
-        std::cout
-                << "k=" << k << std::endl;
-        
         sum = 0;
         
         for(int j = k + 1; j < n; j++){
@@ -71,7 +67,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
     //В этом блоке B и C используются для хранения разложения
 
-    for(int m = 0; m < 1000; m++){
+    for(int m = 0; m < 100; m++){
 
         // Подготовительная часть (строим единичную матрицу, зануляем псевдонули)
 
@@ -79,18 +75,19 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             for(int j = 0; j < n_Var; j++){
                 B[i * n + j] = (i == j);
                 if(fabs(A[i * n + j]) < 1e-20) A[i * n + j] = 0;
+                if(i > j + 1) A[i * n + j] = 0;
             }
         }
 
         //Сдвиг
 
-        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 1.3;
+        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 1;
 
         for(int i = 0; i < n_Var; i++){
             A[i * n + i] -= shift;
         }
     
-        for(int i = 0; i < n_Var; i++){
+        for(int i = 0; i < n_Var - 1; i++){
             for(int j = i + 1; j < n_Var; j++){
                 x = A[i * n + i];
                 y = A[j * n + i];
@@ -100,19 +97,13 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                     if(fabs(sin) < 1e-10) sin = 0;
                     if(fabs(cos) < 1e-10) cos = 0;
                     for(int k = 0; k < n_Var; k++){
-                        if(fabs(A[i * n + k]) < 1e-20) A[i * n + k] = 0;
                         buf = A[i * n + k];
                         A[i * n + k] = buf * cos - A[j * n + k] * sin;
                         A[j * n + k] = buf * sin + A[j * n + k] * cos;
-                        if(fabs(A[i * n + k]) < 1e-20) A[i * n + k] = 0;
-                        if(fabs(A[j * n + k]) < 1e-20) A[j * n + k] = 0;
-
-                        if(fabs(B[k * n + i]) < 1e-20) A[k * n + i] = 0;
+    
                         buf = B[k * n + i];
                         B[k * n + i] = buf * cos - B[k * n + j] * sin;
                         B[k * n + j] = buf * sin + B[k * n + j] * cos; 
-                        if(fabs(A[k * n + i]) < 1e-20) A[k * n + i] = 0;
-                        if(fabs(A[k * n + j]) < 1e-20) A[k * n + j] = 0;
                     }
                 }
             }
@@ -128,9 +119,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             for(int j = 0; j < n_Var; j++){
                 A[i * n + j] = 0;
                 for(int k = 0; k < n_Var; k++){
-                    if(fabs(B[k * n + j]) > 1e-20 && fabs(C[i * n + k]) > 1e-20){
-                        A[i * n + j] += C[i * n + k] * B[k * n + j];
-                    }
+                    A[i * n + j] += C[i * n + k] * B[k * n + j];
                 }
             }
         }
@@ -158,9 +147,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         if(fabs(A[(n_Var - 1) * n + (n_Var - 1)]) < eps){
             EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
             n_Var--;
-            std::cout <<  n_Var<< std::endl;
         }
-        
     }
     
     n_Var--;

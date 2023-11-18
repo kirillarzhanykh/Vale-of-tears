@@ -82,12 +82,12 @@ int main(int argc, char* argv[]){
         }
 
         std::cout << "\n" << "Данная матрица: " << std::endl;
-        matrix_writer(n, n, m, M);
+        matrix_writer(n, n, 5, M);
         std::cout << "\n" << "Матрица после преобразований: " << std::endl;
-        matrix_writer(n, n, m, M_copy);
+        matrix_writer(n, n, 5, M_copy);
 
         if(flag > 2){
-            std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;
+            //std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;
             std::cout << "\n" << "Вектор из чисел на диагонали: " << std::endl;
             for(int i = 0; i < m; i++){
                 std::cout << "\n" << Res[i] << "\n";
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]){
             length_M += Im_P * Im_P;
         } else {
             std::cout << "\n" << "Вектор собственных чисел: " << std::endl;
-            matrix_writer(n, 1, n, Res);
+            matrix_writer(n, 1, m, Res);
         }
         std::cout << "\n" << "Невязка в первом инварианте: " << abs(trace_M - sum1) << std::endl;
 	    std::cout << "\n" << "Невязка во втором инварианте: " << abs(length_M - sum2) << std::endl;

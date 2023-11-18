@@ -1,0 +1,1 @@
+int matrix_creator(int n, int k, char* filename, double* matrix);
