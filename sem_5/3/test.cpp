@@ -22,11 +22,12 @@ int main(int argc, char* argv[]){
         return 0;
     } 
     int n = atoi(argv[1]);
-    int m = atoi(argv[2]);
-    int k = atoi(argv[3]);
+    int p = atoi(argv[2]);
+    int m = atoi(argv[3]);
+    int s = atoi(argv[4]);
     char filename[20];
-    if(argc == 5){
-        strcpy(filename, argv[4]);
+    if(argc == 6){
+        strcpy(filename, argv[5]);
     }
     if(m > n){
         std::cout << "подумай ещё" << std::endl;
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]){
 
     double* M;
     M = new double[n*n];
-    if(matrix_creator(n, k, filename, M) != 0){ 
+    if(matrix_creator(n, s, filename, M) != 0){ 
         delete[] M;
         return 0;
     }
@@ -62,15 +63,19 @@ int main(int argc, char* argv[]){
     double* Raznost;
     Raznost = new double[n];
 
+    double seconds;
     struct timeval start, end;
+
+    copy_filler(n*n, M, M_copy);
+    copy_filler(n, b, b_copy);
 
     gettimeofday(&start, NULL);
 
-    if(solver(n, M_copy, b_copy, Res) == -1){
+    if(solver(n, p, M_copy, b_copy, Res) == -1){
         std::cout << "Матрица вырождена!" << std::endl;
     } else {
         gettimeofday(&end, NULL);
-        double seconds = (end.tv_usec - start.tv_usec) * 1e6;
+        seconds = (end.tv_usec - start.tv_usec) * 1e6;
 
         for(int i = 0; i < n; i++){
             Raznost[i] = Res[i] - Res_Real[i];
@@ -81,14 +86,14 @@ int main(int argc, char* argv[]){
                 b_copy[i] += Res[j] * M[i * n + j];
             }
         }
+
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
-        std::cout << "\n";
-        std::cout << "Норма невязки (относительная): " << relative_norm(n, b_copy, b) << std::endl;
-        std::cout << "\n";
-	    std::cout << "Норма погрешности: " << norm(n, Raznost) << std::endl;
-        std::cout << "\n";
-        std::cout << "Время решения системы: " << seconds << " сек" << std::endl;
+
+        std::cout << argv[0] << ": residual = " << relative_norm(n, b_copy, b) <<
+        " elapsed = " << seconds << " s = " << s << " n = " << n << " m = " << m <<
+        " p = " << p << std::endl;
+        
     }
 	delete[] Raznost;
     delete[] M;

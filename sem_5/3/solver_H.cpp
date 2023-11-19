@@ -1,9 +1,13 @@
 #include "solver_H.h"
 #include <iostream>
+#include <thread>
+#include <pthread.h>
 #include <cmath>
 #define EPS 10e-17
 
-int solver(int n, double* A, double* b, double* x){
+int thread_normer(int n, double* A, double norm, int start, int finish);
+
+int solver(int n, int n_threads, double* A, double* b, double* x){
     long double buf, buf2;
     int num = 0;
     // Нормируем матрицу

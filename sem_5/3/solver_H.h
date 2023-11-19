@@ -1,2 +1,2 @@
 
-int solver(int n, double* A, double* b, double* x);
+int solver(int n, int n_threads, double* A, double* b, double* x);
