@@ -39,7 +39,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
     int num = 0;
 	int chunk;
     // Нормируем матрицу
-	if(cur_thread == 1){
+	if(cur_thread == 0){
 		buf = 0;
 		for(int i = 0; i < n; i++){
 			buf2 = 0;
@@ -61,7 +61,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 
 	
 	for(int i = 0; i < n; i++){
-		if(cur_thread == 1){
+		if(cur_thread == 0){
 			buf = 0;
 			num = i;
 			//Выбираем строку с максимальным первым элементом
@@ -91,11 +91,11 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 		} else {
 			chunk = (n - i) / n_threads + 1;
 		}
-		if(cur_thread == n_threads){
+		if(cur_thread == n_threads - 1){
 			buf = A[i * n + i];
 			for(int j = i + 1; j < n; j++){
 				buf2 = A[j * n + i] / buf;
-				for(int k = i + chunk * (cur_thread - 1); k < n; k++){
+				for(int k = i + chunk * cur_thread; k < n; k++){
 					A[j* n + k] -= A[i * n + k] * buf2;
 				}
 				b[j] -= b[i] * buf2;  // разница только здесь 
@@ -104,7 +104,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 			buf = A[i * n + i];
 			for(int j = i + 1; j < n; j++){
 				buf2 = A[j * n + i] / buf;
-				for(int k = i + chunk * (cur_thread - 1); k < i + chunk * cur_thread; k++){
+				for(int k = i + chunk * cur_thread ; k < i + chunk * (cur_thread + 1); k++){
 					A[j* n + k] -= A[i * n + k] * buf2;
 				}
 			}
@@ -112,7 +112,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 		synchronize(n_threads);
 	}
 	
-	if(cur_thread == 1){
+	if(cur_thread == 0){
 		for(int i = n - 1; i >= 0; i--){
 			x[i] = b[i];
 			for(int j = n - 1; j > i; j--){

@@ -1,8 +1,9 @@
 #include <iostream>
 #include <cstring>
+#include <cmath>
 #include "matrix_creator.h"
 #include "solver_H.h"
-#include <random>
+#include <pthread.h>
 #include <sys/time.h>
 
 int matrix_writer(int a, int b, int m, double* matrix);
@@ -15,6 +16,18 @@ double relative_norm(int n, double* first_vector, double* second_vector);
 
 void copy_filler(int n, double* from, double* to);
 
+void *solve(void *arg);
+
+typedef struct
+{
+	int n;
+    int cur_thread;
+	int n_threads;
+	double *M;
+	double *b;
+	double *Res;
+} ARGS;
+
 int main(int argc, char* argv[]){
    
     if (argc < 4){
@@ -22,8 +35,8 @@ int main(int argc, char* argv[]){
         return 0;
     } 
     int n = atoi(argv[1]);
-    int p = atoi(argv[2]);
-    int m = atoi(argv[3]);
+    int m = atoi(argv[2]);
+    int p = atoi(argv[3]);
     int s = atoi(argv[4]);
     char filename[20];
     if(argc == 6){
@@ -68,15 +81,43 @@ int main(int argc, char* argv[]){
 
     copy_filler(n*n, M, M_copy);
     copy_filler(n, b, b_copy);
+    pthread_t* threads;
+    threads = new pthread_t[p];
+    ARGS* args;
+    args = new ARGS[p];
+
+    if (!(M && b && Res && threads && args))
+	{
+		printf("Not enough memory!\n");
+	}
+
+    for(int i = 0; i < p; i++){
+        args[i].n = n;
+        args[i].cur_thread = i;
+        args[i].n_threads = p;
+        args[i].M = M_copy;
+        args[i].b = b;
+        args[i].Res = Res;
+    }
 
     gettimeofday(&start, NULL);
 
-    if(solver(n, p, M_copy, b_copy, Res) == -1){
+    for(int i = 0; i < p; i++){
+        pthread_create(threads + i, 0, solve, args + i);
+        std::cout << i << std::endl;
+    }
+    for(int i = 0; i < p; i++){
+        pthread_join(threads[i], 0);
+    }
+
+    gettimeofday(&end, NULL);
+
+    if(1 == -1){
         std::cout << "Матрица вырождена!" << std::endl;
     } else {
-        gettimeofday(&end, NULL);
-        seconds = (end.tv_usec - start.tv_usec) * 1e6;
-
+        seconds = (end.tv_sec - start.tv_sec);
+        seconds = ((seconds * 1e6) + end.tv_usec) - (start.tv_usec);
+        seconds /= 1e6;
         for(int i = 0; i < n; i++){
             Raznost[i] = Res[i] - Res_Real[i];
         }
@@ -90,7 +131,7 @@ int main(int argc, char* argv[]){
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
 
-        std::cout << argv[0] << ": residual = " << relative_norm(n, b_copy, b) <<
+        std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, b_copy, b) <<
         " elapsed = " << seconds << " s = " << s << " n = " << n << " m = " << m <<
         " p = " << p << std::endl;
         
@@ -102,6 +143,8 @@ int main(int argc, char* argv[]){
     delete[] b_copy;
     delete[] Res_Real;
     delete[] Res;
+    delete[] threads;
+    delete[] args;
     return 0;
 }
 
@@ -154,4 +197,11 @@ void copy_filler(int n, double* from, double* to){
     for(int i = 0; i < n; i++){
         to[i] = from[i];
     }    
+}
+
+void *solve(void *arg)
+{
+	ARGS *arg_ = static_cast<ARGS*> (arg);
+	solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res);
+	return NULL;
 }
