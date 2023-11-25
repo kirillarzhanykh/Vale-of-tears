@@ -63,7 +63,6 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 
 
 	for(int i = 0; i < n; i++){
-		std::cout << cur_thread;
 		if(cur_thread == 0){
 			buf = 0;
 			num = i;
@@ -89,26 +88,26 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 		synchronize(n_threads);
 		
 		//Вычитаем строку из нижеследующих
-		if((n - i) % n_threads == 0){
-			chunk = (n - i) / n_threads;
-		} else {
-			chunk = (n - i) / n_threads + 1;
-		}
+                if((n - i - 1) % n_threads == 0){
+                        chunk = (n - i - 1) / n_threads;
+                } else {
+                        chunk = (n - i - 1) / n_threads + 1;
+                }
 		if(cur_thread == n_threads - 1){
 			buf = A[i * n + i];
 			for(int j = i + 1; j < n; j++){
 				buf2 = A[j * n + i] / buf;
-				for(int k = i + chunk * cur_thread; k < n; k++){
-					A[j* n + k] -= A[i * n + k] * buf2;
+                                for(int k = i + 1 + chunk * cur_thread; k < n; k++){
+                                        A[j * n + k] -= A[i * n + k] * buf2;
 				}
 				b[j] -= b[i] * buf2;  // разница только здесь 
 			}
-		} else {
+                } else if(chunk != 0){
 			buf = A[i * n + i];
 			for(int j = i + 1; j < n; j++){
 				buf2 = A[j * n + i] / buf;
-				for(int k = i + chunk * cur_thread ; k < i + chunk * (cur_thread + 1); k++){
-					A[j* n + k] -= A[i * n + k] * buf2;
+                                for(int k = i + 1 + chunk * cur_thread; k < std::min(i + 1 + chunk * (cur_thread + 1), n); k++){
+                                        A[j * n + k] -= A[i * n + k] * buf2;
 				}
 			}
 		}

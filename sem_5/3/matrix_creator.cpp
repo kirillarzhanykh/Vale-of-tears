@@ -33,6 +33,7 @@ int matrix_reader(int n, double* matrix, char* filename){
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
+            if(input.get() != '\d') return -1;
             input >> matrix[i * n + j];
             if(input.eof()) return -1;
         }

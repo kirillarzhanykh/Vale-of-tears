@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
         strcpy(filename, argv[5]);
     }
 
-    if(m > n){
+    if(m > n || m < 0 || n < 0 || eps < 1e-20){
         std::cout << "подумай ещё" << std::endl;
         return 0;
     }

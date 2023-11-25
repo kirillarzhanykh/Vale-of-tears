@@ -144,10 +144,11 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
         //Исчерпывание
 
-        if(fabs(A[(n_Var - 1) * n + (n_Var - 1)]) < eps){
+        if(fabs(A[(n_Var - 1) * n + (n_Var - 1) - 1]) < eps){
             EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
             n_Var--;
         }
+        if(n_Var == 1) return 0;
     }
     
     n_Var--;
