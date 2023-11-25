@@ -46,6 +46,10 @@ int main(int argc, char* argv[]){
         std::cout << "подумай ещё" << std::endl;
         return 0;
     }
+    if(p > 4 || p < 1){
+        std::cout << "подумай ещё" << std::endl;
+        return 0;
+    }
 
     double* M;
     M = new double[n*n];
@@ -104,7 +108,6 @@ int main(int argc, char* argv[]){
 
     for(int i = 0; i < p; i++){
         pthread_create(threads + i, 0, solve, args + i);
-        std::cout << i << std::endl;
     }
     for(int i = 0; i < p; i++){
         pthread_join(threads[i], 0);
@@ -131,7 +134,7 @@ int main(int argc, char* argv[]){
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
 
-        std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, b_copy, b) <<
+        std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, Res, Res_Real) <<
         " elapsed = " << seconds << " s = " << s << " n = " << n << " m = " << m <<
         " p = " << p << std::endl;
         

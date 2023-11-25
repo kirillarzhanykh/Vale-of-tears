@@ -59,8 +59,11 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 		}
 	}
 
-	
+	synchronize(n_threads);
+
+
 	for(int i = 0; i < n; i++){
+		std::cout << cur_thread;
 		if(cur_thread == 0){
 			buf = 0;
 			num = i;
@@ -118,7 +121,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 			for(int j = n - 1; j > i; j--){
 				x[i] -= x[j] * A[i * n + j];
 			}
-			x[i] /= A[i * n + i];
+			x[i] = x[i] / A[i * n + i];
 		}
 	}
 
