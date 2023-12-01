@@ -86,13 +86,13 @@ int main(int argc, char* argv[]){
         std::cout << "\n" << "Матрица после преобразований: " << std::endl;
         matrix_writer(n, n, 5, M_copy);
 
-        if(flag > 2){
+        if(flag > 1){
             //std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;
             std::cout << "\n" << "Вектор из чисел на диагонали: " << std::endl;
             for(int i = 0; i < m; i++){
                 std::cout << "\n" << Res[i] << "\n";
             }
-        } else if(flag == 2){
+        } else if(flag == 1){
             double a11 = M_copy[0];
             double a12 = M_copy[1];
             double a21 = M_copy[n];
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]){
             std::cout.precision(3);
             std::cout << "\n" << R_P << " + i * " << Im_P << "\n";
             std::cout << "\n" << R_P << " - i * " << Im_P << "\n";
-            for(int i = flag; i < n; i++){
+            for(int i = flag + 1; i < n; i++){
                 std::cout << "\n" << Res[i] << "\n";
             }
             length_M -=  M_copy[0] *  M_copy[0];
