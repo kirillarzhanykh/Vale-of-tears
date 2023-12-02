@@ -50,35 +50,38 @@ int main(int argc, char* argv[]){
         std::cout << "подумай ещё" << std::endl;
         return 0;
     }
-
+    printf("AA\n");
     double* M;
     M = new double[n*n];
     if(matrix_creator(n, s, filename, M) != 0){ 
         delete[] M;
         return 0;
     }
+    printf("AA2\n");
     double* M_copy;
     M_copy = new double[n*n];
     copy_filler(n*n, M, M_copy);
-
+    printf("AA3\n");
     double* b;
     b = new double[n];
     right_side_creator(n, M, b);
     double* b_copy;
     b_copy = new double[n];
     copy_filler(n, b, b_copy);
-
+    printf("AA4\n");
     double* Res_Real;
     Res_Real = new double[n];
-    for(int i = 0; i < n; i++){
-        Res_Real[i] = 0;
-        Res_Real[i] += ((i + 1) % 2);
-    }
-
     double* Res;
     Res = new double[n];
     double* Raznost;
     Raznost = new double[n];
+    printf("AA5\n");
+    for(int i = 0; i < n; i++){
+        Res_Real[i] = 0;
+        Res_Real[i] += ((i + 1) % 2);
+        Res[i] = 0;
+        Raznost[i] = 0;
+    }
 
     double seconds;
     struct timeval start, end;
@@ -106,12 +109,14 @@ int main(int argc, char* argv[]){
 
     gettimeofday(&start, NULL);
 
-    for(int i = 0; i < p; i++){
-        pthread_create(threads + i, 0, solve, args + i);
-    }
-    for(int i = 0; i < p; i++){
-        pthread_join(threads[i], 0);
-    }
+
+        for(int i = 0; i < p; i++){
+            pthread_create(threads + i, 0, solve, args + i);
+        }
+        for(int i = 0; i < p; i++){
+            pthread_join(threads[i], 0);
+        }
+
 
     gettimeofday(&end, NULL);
 
@@ -205,6 +210,6 @@ void copy_filler(int n, double* from, double* to){
 void *solve(void *arg)
 {
 	ARGS *arg_ = static_cast<ARGS*> (arg);
-	solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res);
+        if(solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res) == -1) std::cout << "DET = 0" << std::endl;
 	return NULL;
 }

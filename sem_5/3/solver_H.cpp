@@ -73,7 +73,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 					num = j; 
 				}
 			}
-			if(A[num * n + i] < EPS && A[num * n + i] > -EPS) return -1;
+
 
 			//Переносим эту строку наверх
 			for(int j = i; j < n ; j++){
@@ -86,6 +86,11 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 			b[i] = buf;
 		}
 		synchronize(n_threads);
+
+                if(A[i * n + i] < EPS && A[i * n + i] > -EPS){
+                    if(cur_thread == 0) std::cout << "\n DET = 0" << std::endl;
+                    return -1;
+                }
 		
 		//Вычитаем строку из нижеследующих
         if((n - i - 1) % n_threads == 0){

@@ -81,7 +81,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
         //Сдвиг
 
-        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 1;
+        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 0;
 
         for(int i = 0; i < n_Var; i++){
             A[i * n + i] -= shift;
@@ -148,7 +148,8 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
             n_Var--;
         }
-        if(n_Var == 1) return 0;
+        if(n_Var == 2) return 2;
+        if(n_Var == 1) return 1;
     }
     
     n_Var--;

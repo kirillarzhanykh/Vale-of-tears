@@ -37,12 +37,12 @@ int matrix_reader(int n, double* matrix, char* filename){
         for (int j = 0; j < n; j++) {
             //if(input.get() != '%n') return -1;
             input >> kost;
-            buf = std::atoi(kost.c_str());
-            if (buf == 0 && kost != "0") {
-                return -1;
-            } else {
+            buf = std::atof(kost.c_str());
+            //if (buf == 0 && kost != "0") {
+                //return -1;
+            //} else {
                 matrix[i * n + j] = buf;
-            }
+            //}
             if(input.eof()) return -1;
         }
     }
