@@ -67,21 +67,22 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
 
     //В этом блоке B и C используются для хранения разложения
 
-    for(int m = 0; m < 100; m++){
+    for(int m = 0; m < 1000; m++){
 
         // Подготовительная часть (строим единичную матрицу, зануляем псевдонули)
-
+        
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
                 B[i * n + j] = (i == j);
                 if(fabs(A[i * n + j]) < 1e-20) A[i * n + j] = 0;
-                if(i > j + 1) A[i * n + j] = 0;
+                //if(i > j + 1) A[i * n + j] = 0;
             }
         }
+        
 
         //Сдвиг
 
-        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 0;
+        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 1.3;
 
         for(int i = 0; i < n_Var; i++){
             A[i * n + i] -= shift;
@@ -116,9 +117,9 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         }
 
         for(int i = 0; i < n_Var; i++){
-            for(int j = 0; j < n_Var; j++){
+            for(int j = std::fmax(0, i - 1); j < n_Var; j++){
                 A[i * n + j] = 0;
-                for(int k = 0; k < n_Var; k++){
+                for(int k = i; k < n_Var; k++){
                     A[i * n + j] += C[i * n + k] * B[k * n + j];
                 }
             }
@@ -148,10 +149,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
             n_Var--;
         }
-        if(n_Var == 2) return 2;
-        if(n_Var == 1) return 1;
+        if(n_Var <= 2) return n_Var;
     }
-    
-    n_Var--;
     return n_Var;
 }
