@@ -48,14 +48,15 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 			}
 			buf += buf2;
 		}
-		if (buf <= 0) return -1;
-		for(int i = 0; i < n; i++){
-			for(int j = 0; j < n; j++){
-				A[i * n + j] = A[i * n + j] / buf;
+		if (buf > EPS){
+			for(int i = 0; i < n; i++){
+				for(int j = 0; j < n; j++){
+					A[i * n + j] = A[i * n + j] / buf;
+				}
 			}
-		}
-		for(int i = 0; i < n; i++){
-			b[i] = b[i] / buf;
+			for(int i = 0; i < n; i++){
+				b[i] = b[i] / buf;
+			}
 		}
 	}
 
@@ -74,7 +75,6 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 				}
 			}
 
-
 			//Переносим эту строку наверх
 			for(int j = i; j < n ; j++){
 				buf = A[num * n + j];
@@ -87,10 +87,9 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 		}
 		synchronize(n_threads);
 
-                if(A[i * n + i] < EPS && A[i * n + i] > -EPS){
-                    if(cur_thread == 0) std::cout << "\n DET = 0" << std::endl;
-                    return -1;
-                }
+        if(A[i * n + i] < EPS && A[i * n + i] > -EPS){
+        	return -1;
+        }
 		
 		//Вычитаем строку из нижеследующих
         if((n - i - 1) % n_threads == 0){

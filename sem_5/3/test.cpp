@@ -28,6 +28,9 @@ typedef struct
 	double *Res;
 } ARGS;
 
+int flag = 0;
+double sec;
+
 int main(int argc, char* argv[]){
    
     if (argc < 4){
@@ -83,8 +86,6 @@ int main(int argc, char* argv[]){
         Raznost[i] = 0;
     }
 
-    double seconds;
-    struct timeval start, end;
 
     copy_filler(n*n, M, M_copy);
     copy_filler(n, b, b_copy);
@@ -92,11 +93,6 @@ int main(int argc, char* argv[]){
     threads = new pthread_t[p];
     ARGS* args;
     args = new ARGS[p];
-
-    if (!(M && b && Res && threads && args))
-	{
-		printf("Not enough memory!\n");
-	}
 
     for(int i = 0; i < p; i++){
         args[i].n = n;
@@ -107,7 +103,7 @@ int main(int argc, char* argv[]){
         args[i].Res = Res;
     }
 
-    gettimeofday(&start, NULL);
+    
 
 
         for(int i = 0; i < p; i++){
@@ -117,15 +113,10 @@ int main(int argc, char* argv[]){
             pthread_join(threads[i], 0);
         }
 
-
-    gettimeofday(&end, NULL);
-
-    if(1 == -1){
+    if(flag == -1){
         std::cout << "Матрица вырождена!" << std::endl;
     } else {
-        seconds = (end.tv_sec - start.tv_sec);
-        seconds = ((seconds * 1e6) + end.tv_usec) - (start.tv_usec);
-        seconds /= 1e6;
+
         for(int i = 0; i < n; i++){
             Raznost[i] = Res[i] - Res_Real[i];
         }
@@ -140,7 +131,7 @@ int main(int argc, char* argv[]){
         matrix_writer(n, 1, m, Res);
 
         std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, Res, Res_Real) <<
-        " elapsed = " << seconds << " s = " << s << " n = " << n << " m = " << m <<
+        " elapsed = " << sec << " s = " << s << " n = " << n << " m = " << m <<
         " p = " << p << std::endl;
         
     }
@@ -209,7 +200,13 @@ void copy_filler(int n, double* from, double* to){
 
 void *solve(void *arg)
 {
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
 	ARGS *arg_ = static_cast<ARGS*> (arg);
-        if(solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res) == -1) std::cout << "DET = 0" << std::endl;
+    if(solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res) == -1) flag = -1;
+    gettimeofday(&end, NULL);
+    sec = (end.tv_sec - start.tv_sec);
+    sec = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
+    sec /= 1e6;
 	return NULL;
 }
