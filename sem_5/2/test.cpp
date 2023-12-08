@@ -84,7 +84,7 @@ int main(int argc, char* argv[]){
         std::cout << "\n" << "Данная матрица: " << std::endl;
         matrix_writer(n, n, m, M);
         std::cout << "\n" << "Матрица после преобразований: " << std::endl;
-        matrix_writer(n, n, 5, M_copy);
+        matrix_writer(n, n, m, M_copy);
 
         if(flag > 2){
             //std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;

@@ -26,7 +26,7 @@ int matrix_creator(int n, int k, char* filename, double* matrix){
 int matrix_reader(int n, double* matrix, char* filename){
     std::ifstream input;
     std::string kost;
-    int buf;
+    double buf;
     input.open(filename);
     if (!input.is_open()) {
         //std::cout << "Ошибка открытия файла!" << std::endl;
@@ -35,14 +35,9 @@ int matrix_reader(int n, double* matrix, char* filename){
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            //if(input.get() != '%n') return -1;
             input >> kost;
-            buf = std::atoi(kost.c_str());
-            if (buf == 0 && kost != "0") {
-                return -1;
-            } else {
-                matrix[i * n + j] = buf;
-            }
+            buf = std::atof(kost.c_str());
+            matrix[i * n + j] = buf;
             if(input.eof()) return -1;
         }
     }
@@ -50,3 +45,4 @@ int matrix_reader(int n, double* matrix, char* filename){
     input.close();
     return 0;
 }
+
