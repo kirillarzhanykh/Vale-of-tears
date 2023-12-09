@@ -109,11 +109,6 @@ int main(int argc, char* argv[]){
         for(int i = 0; i < p; i++){
             if(pthread_create(threads + i, 0, solve, args + i) != 0){
                 std::cout << "Не удалось создать поток!" << std::endl;
-                for(int j = 0; j < i - 1; j++){
-                    pthread_join(threads[j], 0);
-
-                }
-                std::cout << "Не удалось создать поток!" << std::endl;
                 delete[] Raznost;
                 delete[] M;
                 delete[] M_copy;
