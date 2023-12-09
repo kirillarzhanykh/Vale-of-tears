@@ -1,6 +1,6 @@
 #include "eigenvalues_QR.h"
 
-int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, double eps){
+int eigenvalues(int n, double* A, double* B, double* EigenValues, double eps){
     
     double sum;
     double aNorm;

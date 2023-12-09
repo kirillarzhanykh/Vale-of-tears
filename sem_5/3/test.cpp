@@ -3,6 +3,7 @@
 #include <cmath>
 #include "matrix_creator.h"
 #include "solver_H.h"
+#include "multiplier.h"
 #include <pthread.h>
 #include <sys/time.h>
 
@@ -18,6 +19,8 @@ void copy_filler(int n, double* from, double* to);
 
 void *solve(void *arg);
 
+void *multiply(void *arg);
+
 typedef struct
 {
 	int n;
@@ -29,7 +32,7 @@ typedef struct
 } ARGS;
 
 int flag = 0;
-double sec;
+double sec, sec2;
 
 int main(int argc, char* argv[]){
    
@@ -99,53 +102,67 @@ int main(int argc, char* argv[]){
         args[i].cur_thread = i;
         args[i].n_threads = p;
         args[i].M = M_copy;
-        args[i].b = b;
+        args[i].b = b_copy;
         args[i].Res = Res;
     }
 
-    
-
-
-        for(int i = 0; i < p; i++){
-            if(pthread_create(threads + i, 0, solve, args + i) != 0){
-                std::cout << "Не удалось создать поток!" << std::endl;
-                delete[] Raznost;
-                delete[] M;
-                delete[] M_copy;
-                delete[] b;
-                delete[] b_copy;
-                delete[] Res_Real;
-                delete[] Res;
-                delete[] threads;
-                delete[] args;
-                return 0;
-            }
+    for(int i = 0; i < p; i++){
+        if(pthread_create(threads + i, 0, solve, args + i) != 0){
+            std::cout << "Не удалось создать поток!" << std::endl;
+            delete[] Raznost;
+            delete[] M;
+            delete[] M_copy;
+            delete[] b;
+            delete[] b_copy;
+            delete[] Res_Real;
+            delete[] Res;
+            delete[] threads;
+            delete[] args;
+            return 0;
         }
-        for(int i = 0; i < p; i++){
-            pthread_join(threads[i], 0);
+    }
+    for(int i = 0; i < p; i++){
+        pthread_join(threads[i], 0);
+    }
+
+    //Невязка
+
+    for(int i = 0; i < p; i++){
+        args[i].n = n;
+        args[i].cur_thread = i;
+        args[i].n_threads = p;
+        args[i].M = M;
+        args[i].b = b_copy;
+        args[i].Res = Res;
+    }
+
+    for(int i = 0; i < p; i++){
+        if(pthread_create(threads + i, 0, multiply, args + i) != 0){
+            std::cout << "Не удалось создать поток!" << std::endl;
+            delete[] Raznost;
+            delete[] M;
+            delete[] M_copy;
+            delete[] b;
+            delete[] b_copy;
+            delete[] Res_Real;
+            delete[] Res;
+            delete[] threads;
+            delete[] args;
+            return 0;
         }
-
-
-
+    }
+    for(int i = 0; i < p; i++){
+        pthread_join(threads[i], 0);
+    }
 
     if(flag == -1){
         std::cout << "Матрица вырождена!" << std::endl;
     } else {
 
-        for(int i = 0; i < n; i++){
-            Raznost[i] = Res[i] - Res_Real[i];
-        }
-        for(int i = 0; i < n; i++){
-            b_copy[i] = 0;
-            for(int j = 0; j < n; j++){
-                b_copy[i] += Res[j] * M[i * n + j];
-            }
-        }
-
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
 
-        std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, Res, Res_Real) <<
+        std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, b_copy, b) <<
         " elapsed = " << sec << " s = " << s << " n = " << n << " m = " << m <<
         " p = " << p << std::endl;
         
@@ -213,8 +230,7 @@ void copy_filler(int n, double* from, double* to){
     }    
 }
 
-void *solve(void *arg)
-{
+void *solve(void *arg){
     struct timeval start, end;
     gettimeofday(&start, NULL);
 	ARGS *arg_ = static_cast<ARGS*> (arg);
@@ -223,5 +239,17 @@ void *solve(void *arg)
     sec = (end.tv_sec - start.tv_sec);
     sec = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
     sec /= 1e6;
+	return NULL;
+}
+
+void *multiply(void *arg){
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+	ARGS *arg_ = static_cast<ARGS*> (arg);
+    if(multiplier(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res) == -1) flag = -1;
+    gettimeofday(&end, NULL);
+    sec2 = (end.tv_sec - start.tv_sec);
+    sec2 = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
+    sec2 /= 1e6;
 	return NULL;
 }

@@ -44,11 +44,8 @@ int main(int argc, char* argv[]){
 
     double* Mem1;
     Mem1 = new double[n*n + 1];
-    double* Mem2;
-    Mem2 = new double[n*n];
 	for(int i = 0; i < n * n; i++){
 		Mem1[i] = 0;
-		Mem2[i] = 0;
 	}
 	for(int i = 0; i < n; i++){
 		Res[i] = 0;
@@ -56,7 +53,7 @@ int main(int argc, char* argv[]){
 
     int flag;
     clock_t start = clock();
-    flag = eigenvalues(n, M_copy, Mem1, Mem2, Res, eps);
+    flag = eigenvalues(n, M_copy, Mem1, Res, eps);
     clock_t end = clock();
     if(flag == -1){    //Да, этот случай невозможен, ещё вопросы?
         std::cout << "Ошибка!" << std::endl; 
@@ -115,7 +112,6 @@ int main(int argc, char* argv[]){
     delete[] M;
     delete[] M_copy;
     delete[] Mem1;
-    delete[] Mem2;
     delete[] Res;
     return 0;
 }
