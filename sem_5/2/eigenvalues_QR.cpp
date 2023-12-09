@@ -63,9 +63,9 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
     
     int flag = 1;
     int n_Var = n;
-    double x, y, cos, sin, buf, shift;
+    double x, y, buf, shift;
 
-    //В этом блоке B и C используются для хранения разложения
+    //В этом блоке B используется для хранения разложения
 
     for(int m = 0; m < 1000; m++){
 
@@ -73,8 +73,7 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
-                B[i * n + j] = (i == j);
-                if(fabs(A[i * n + j]) < 1e-10) A[i * n + j] = 0;
+                if(fabs(A[i * n + j]) < 1e-20) A[i * n + j] = 0;
                 if(i > j + 1) A[i * n + j] = 0;
             }
         }
@@ -89,41 +88,28 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         }
     
         for(int i = 0; i < n_Var - 1; i++){
-            for(int j = i + 1; j < n_Var; j++){
-                x = A[i * n + i];
-                y = A[j * n + i];
-                if( x * x + y * y > 0 ){
-                    cos = x / std::sqrt(x * x + y * y);
-                    sin = - y / std::sqrt(x * x + y * y);
-                    if(fabs(sin) < 1e-10) sin = 0;
-                    if(fabs(cos) < 1e-10) cos = 0;
-                    for(int k = 0; k < n_Var; k++){
-                        buf = A[i * n + k];
-                        if(fabs(buf) < 1e-10) buf = 0;
-                        A[i * n + k] = buf * cos - A[j * n + k] * sin;
-                        A[j * n + k] = buf * sin + A[j * n + k] * cos;
-    
-                        buf = B[k * n + i];
-                        if(fabs(buf) < 1e-10) buf = 0;
-                        B[k * n + i] = buf * cos - B[k * n + j] * sin;
-                        B[k * n + j] = buf * sin + B[k * n + j] * cos; 
-                    }
+            int j = i + 1;
+            x = A[i * n + i];
+            y = A[j * n + i];
+            if( x * x + y * y > 0 ){
+                B[2 * i] = x / std::sqrt(x * x + y * y); //cos
+                B[2 * i + 1] = - y / std::sqrt(x * x + y * y); //sin
+                for(int k = i; k < n_Var; k++){
+                    buf = A[i * n + k];
+                    if(fabs(buf) < 1e-20) buf = 0;
+                    A[i * n + k] = buf * B[2 * i] - A[j * n + k] * B[2 * i + 1];
+                    A[j * n + k] = buf * B[2 * i + 1] + A[j * n + k] * B[2 * i];
                 }
             }
+            
         }
      
-        for(int i = 0; i < n_Var; i++){
-            for(int j = 0; j < n_Var; j++){
-                C[i * n + j] = A[i * n + j];
-            }
-        }
-
-        for(int i = 0; i < n_Var; i++){
-            for(int j = std::fmax(0, i - 1); j < n_Var; j++){
-                A[i * n + j] = 0;
-                for(int k = i; k < n_Var; k++){
-                    A[i * n + j] += C[i * n + k] * B[k * n + j];
-                }
+        for(int i = 0; i < n_Var - 1; i++){
+            for(int j = 0; j < i + 2; j++){
+                x = A[j * n + i];
+                y = A[j * n + i + 1];
+                A[j * n + i] = x * B[2 * i] - y * B[2 * i + 1];
+                A[j * n + i + 1] = x * B[2 * i + 1] + y * B[2 * i];
             }
         }
 
@@ -151,7 +137,33 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
             EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
             n_Var--;
         }
-        if(n_Var <= 2) return n_Var;
+        if(n_Var == 1) return 0;
+        if(n_Var == 2){
+            double a11 = A[0];
+            double a12 = A[1];
+            double a21 = A[n];
+            double a22 = A[n + 1];
+            double b = - (a11 + a22); 
+            double c = a11 * a22 - a21 * a12;
+            double R_P = - b / 2;
+            double Im_P = 0;
+            if( 4 * c - b * b > 0 ){
+                Im_P = std::sqrt(4 * c - b * b) / 2;
+                EigenValues[0] = R_P;
+                EigenValues[1] = R_P;
+                EigenValues[n] = Im_P;
+                EigenValues[n + 1] = - Im_P;
+            }else{
+                Im_P = std::sqrt(b * b - 4 * c) / 2;
+                EigenValues[0] = R_P + Im_P;
+                EigenValues[1] = R_P - Im_P;
+                EigenValues[n] = 0;
+                EigenValues[n + 1] = 0;
+            }
+            return 0;
+        }
     }
+
+    n_Var--;
     return n_Var;
 }
