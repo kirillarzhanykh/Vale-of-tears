@@ -10,6 +10,7 @@ double func(int k, int n, int i, int j){
     }
 
     if(k == 3){
+        if (i == 1000) return 0;
         return abs(i - j);
     }
 

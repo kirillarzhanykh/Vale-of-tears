@@ -121,10 +121,10 @@ int main(int argc, char* argv[]){
             length_M += Im_P * Im_P;
         } else {
             std::cout << "\n" << "Вектор собственных чисел: " << std::endl;
-            matrix_writer(n, 1, m, Res);
+            matrix_writer(n, 1, n, Res);
         }
-        std::cout << "\n" << "Невязка в первом инварианте: " << abs(trace_M - sum1) << std::endl;
-	    std::cout << "\n" << "Невязка во втором инварианте: " << abs(length_M - sum2) << std::endl;
+        std::cout << "\n" << "Невязка в первом инварианте: " << fabs(trace_M - sum1) << std::endl;
+            std::cout << "\n" << "Невязка во втором инварианте: " << fabs(length_M - sum2) << std::endl;
         std::cout << "\n" << "Время поиска собственных значений: " << seconds << " сек" << std::endl;
     }
     delete[] M;

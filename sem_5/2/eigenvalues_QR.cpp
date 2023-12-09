@@ -74,15 +74,15 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
         for(int i = 0; i < n_Var; i++){
             for(int j = 0; j < n_Var; j++){
                 B[i * n + j] = (i == j);
-                if(fabs(A[i * n + j]) < 1e-20) A[i * n + j] = 0;
-                //if(i > j + 1) A[i * n + j] = 0;
+                if(fabs(A[i * n + j]) < 1e-10) A[i * n + j] = 0;
+                if(i > j + 1) A[i * n + j] = 0;
             }
         }
         
 
         //Сдвиг
 
-        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 1.3;
+        shift = A[(n_Var - 1) * n + (n_Var - 1)] * 0;
 
         for(int i = 0; i < n_Var; i++){
             A[i * n + i] -= shift;
@@ -99,10 +99,12 @@ int eigenvalues(int n, double* A, double* B, double* C, double* EigenValues, dou
                     if(fabs(cos) < 1e-10) cos = 0;
                     for(int k = 0; k < n_Var; k++){
                         buf = A[i * n + k];
+                        if(fabs(buf) < 1e-10) buf = 0;
                         A[i * n + k] = buf * cos - A[j * n + k] * sin;
                         A[j * n + k] = buf * sin + A[j * n + k] * cos;
     
                         buf = B[k * n + i];
+                        if(fabs(buf) < 1e-10) buf = 0;
                         B[k * n + i] = buf * cos - B[k * n + j] * sin;
                         B[k * n + j] = buf * sin + B[k * n + j] * cos; 
                     }

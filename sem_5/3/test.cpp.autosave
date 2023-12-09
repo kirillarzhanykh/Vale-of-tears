@@ -111,7 +111,6 @@ int main(int argc, char* argv[]){
                 std::cout << "Не удалось создать поток!" << std::endl;
                 for(int j = 0; j < i - 1; j++){
                     pthread_join(threads[j], 0);
-
                 }
                 std::cout << "Не удалось создать поток!" << std::endl;
                 delete[] Raznost;
