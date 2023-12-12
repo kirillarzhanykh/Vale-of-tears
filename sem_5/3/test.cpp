@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
             delete[] Res;
             delete[] threads;
             delete[] args;
-            return 0;
+            return -1;
         }
     }
     for(int i = 0; i < p; i++){
@@ -159,8 +159,11 @@ int main(int argc, char* argv[]){
         std::cout << "Матрица вырождена!" << std::endl;
     } else {
 
+        
         matrix_writer(n, n, m, M);
         matrix_writer(n, 1, m, Res);
+        std::cout << "\n" <<  "Время решения системы: " << sec << std::endl;
+        std::cout << "Время вычисления невязки: " << sec2 << std::endl;
 
         std::cout << "\n" << argv[0] << ": residual = " << relative_norm(n, b_copy, b) <<
         " elapsed = " << sec << " s = " << s << " n = " << n << " m = " << m <<
@@ -249,7 +252,7 @@ void *multiply(void *arg){
     if(multiplier(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res) == -1) flag = -1;
     gettimeofday(&end, NULL);
     sec2 = (end.tv_sec - start.tv_sec);
-    sec2 = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
+    sec2 = ((sec2 * 1e6) + end.tv_usec) - (start.tv_usec);
     sec2 /= 1e6;
 	return NULL;
 }
