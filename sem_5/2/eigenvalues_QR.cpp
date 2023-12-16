@@ -68,8 +68,26 @@ int eigenvalues(int n, double* A, double* B, double* EigenValues, double eps){
 
     //В этом блоке B используется для хранения разложения
 
-    for(int m = 0; m < 1000; m++){
-        std::cout << m;
+    for(int m = 0; m < 10000; m++){
+
+        for(int i = 0; i < n_Var; i++){
+            EigenValues[i] = A[i * n + i];
+        }
+        
+        flag = 1;
+
+        for(int i = 1; i < n_Var; i++){
+            if(fabs(A[i * n + i - 1]) > eps) flag = 0;
+        }
+
+        if(flag == 1) return 0;
+
+        //Исчерпывание
+
+        if(fabs(A[(n_Var - 1) * n + (n_Var - 1) - 1]) < eps){
+            EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
+            n_Var--;
+        }
 
 
         // Подготовительная часть (строим единичную матрицу, зануляем псевдонули)
@@ -81,7 +99,6 @@ int eigenvalues(int n, double* A, double* B, double* EigenValues, double eps){
             }
         }
         
-
         //Сдвиг
 
         shift = A[(n_Var - 1) * n + (n_Var - 1)] * 0;
@@ -99,17 +116,20 @@ int eigenvalues(int n, double* A, double* B, double* EigenValues, double eps){
                 B[2 * i + 1] = - y / std::sqrt(x * x + y * y); //sin
                 if(fabs(B[2 * i]) < 1e-20) B[2 * i] = 0;
                 if(fabs(B[2 * i + 1] ) < 1e-20) B[2 * i + 1] = 0;
-                for(int k = i; k < n_Var - 1; k++){
+                for(int k = i + 1; k < n_Var; k++){
                     buf = A[i * n + k];
-                    if(fabs(buf) < 1e-10) buf = 0;
+                  
                     A[i * n + k] = buf * B[2 * i] - A[j * n + k] * B[2 * i + 1];
                     A[j * n + k] = buf * B[2 * i + 1] + A[j * n + k] * B[2 * i];
-                    if(fabs(A[i * n + k]) < 1e-20) A[i * n + k] = 0;
-                    if(fabs(A[j * n + k]) < 1e-20) A[j * n + k] = 0;
+                    
                 }
+                A[i * n + i] = std::sqrt(x * x + y * y);
+                A[j * n + i] = 0;
+
             }
             
         }
+
      
         for(int i = 0; i < n_Var - 1; i++){
             for(int j = 0; j < i + 2; j++){
@@ -119,8 +139,6 @@ int eigenvalues(int n, double* A, double* B, double* EigenValues, double eps){
                 if(fabs(y) < 1e-20) y = 0;
                 A[j * n + i] = x * B[2 * i] - y * B[2 * i + 1];
                 A[j * n + i + 1] = x * B[2 * i + 1] + y * B[2 * i];
-                if(fabs(A[j * n + i]) < 1e-20) A[j * n + i] = 0;
-                if(fabs(A[j * n + i + 1]) < 1e-20) A[j * n + i + 1] = 0;
             }
         }
 
@@ -130,24 +148,6 @@ int eigenvalues(int n, double* A, double* B, double* EigenValues, double eps){
             A[i * n + i] += shift;
         }
 
-        for(int i = 0; i < n_Var; i++){
-            EigenValues[i] = A[i * n + i];
-        }
-        
-        flag = 1;
-
-        for(int i = 1; i < n_Var; i++){
-            if(fabs(A[i * n + i - 1]) > eps) flag = 0;
-        }
-
-        if(flag == 2) return 0;
-
-        //Исчерпывание
-
-        if(fabs(A[(n_Var - 1) * n + (n_Var - 1) - 1]) < eps){
-            EigenValues[n_Var - 1] = A[(n_Var - 1) * n + (n_Var - 1)];
-            n_Var--;
-        }
         if(n_Var == 1) return 0;
         if(n_Var == 2){
             double a11 = A[0];

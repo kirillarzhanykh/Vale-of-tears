@@ -82,7 +82,7 @@ int main(int argc, char* argv[]){
         matrix_writer(n, n, m, M);
         std::cout << "\n" << "Матрица после преобразований: " << std::endl;
         matrix_writer(n, n, m, M_copy);
-        //std::cout.precision(3);
+        std::cout.precision(3);
         if(flag > 2){
             //std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;
             std::cout << "\n" << "Вектор из чисел на диагонали: " << std::endl;
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
             }
         } else if(fabs(Res[n]) < 1e-20){
             std::cout << "\n" << "Вектор собственных чисел (вещественных): " << std::endl;
-            matrix_writer(n, 1, n, Res);
+            matrix_writer(n, 1, m, Res);
         } else {
             std::cout << "\n" << "Вектор собственных чисел (не только вещественных): " << std::endl;
             std::cout << "\n" << Res[0] << " + " << Res[n] << " * i" << std::endl;
