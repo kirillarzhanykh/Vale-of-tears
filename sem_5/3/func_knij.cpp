@@ -6,6 +6,7 @@ double func(int k, int n, int i, int j){
     }
 
     if(k == 2){
+	    if(i == 1000) return 0;
         return fmax(i + 1, j + 1);
     }
 

@@ -44,10 +44,10 @@ int main(int argc, char* argv[]){
 
     double* Mem1;
     Mem1 = new double[n*n + 1];
-	for(int i = 0; i < n * n; i++){
+        for(int i = 0; i < n * n + 1; i++){
 		Mem1[i] = 0;
 	}
-	for(int i = 0; i < n; i++){
+        for(int i = 0; i < n + 2; i++){
 		Res[i] = 0;
 	}
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]){
         matrix_writer(n, n, m, M);
         std::cout << "\n" << "Матрица после преобразований: " << std::endl;
         matrix_writer(n, n, m, M_copy);
-        std::cout.precision(3);
+        //std::cout.precision(3);
         if(flag > 2){
             //std::cout << "\n" << "Больше двух невещественных собственных значений,\n или недостаточная точность метода (алгоритм не сошёлся)!" << std::endl;
             std::cout << "\n" << "Вектор из чисел на диагонали: " << std::endl;
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
             }
         } else if(fabs(Res[n]) < 1e-20){
             std::cout << "\n" << "Вектор собственных чисел (вещественных): " << std::endl;
-            matrix_writer(n, 1, m, Res);
+            matrix_writer(n, 1, n, Res);
         } else {
             std::cout << "\n" << "Вектор собственных чисел (не только вещественных): " << std::endl;
             std::cout << "\n" << Res[0] << " + " << Res[n] << " * i" << std::endl;

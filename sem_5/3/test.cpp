@@ -56,32 +56,32 @@ int main(int argc, char* argv[]){
         std::cout << "подумай ещё" << std::endl;
         return 0;
     }
-    printf("AA\n");
+
     double* M;
     M = new double[n*n];
     if(matrix_creator(n, s, filename, M) != 0){ 
         delete[] M;
         return 0;
     }
-    printf("AA2\n");
+
     double* M_copy;
     M_copy = new double[n*n];
     copy_filler(n*n, M, M_copy);
-    printf("AA3\n");
+
     double* b;
     b = new double[n];
     right_side_creator(n, M, b);
     double* b_copy;
     b_copy = new double[n];
     copy_filler(n, b, b_copy);
-    printf("AA4\n");
+
     double* Res_Real;
     Res_Real = new double[n];
     double* Res;
     Res = new double[n];
     double* Raznost;
     Raznost = new double[n];
-    printf("AA5\n");
+
     for(int i = 0; i < n; i++){
         Res_Real[i] = 0;
         Res_Real[i] += ((i + 1) % 2);
@@ -109,15 +109,7 @@ int main(int argc, char* argv[]){
     for(int i = 0; i < p; i++){
         if(pthread_create(threads + i, 0, solve, args + i) != 0){
             std::cout << "Не удалось создать поток!" << std::endl;
-            delete[] Raznost;
-            delete[] M;
-            delete[] M_copy;
-            delete[] b;
-            delete[] b_copy;
-            delete[] Res_Real;
-            delete[] Res;
-            delete[] threads;
-            delete[] args;
+
             return 0;
         }
     }
