@@ -240,13 +240,13 @@ void copy_filler(int n, double* from, double* to){
 
 void *solve(void *arg){
     struct timeval start, end;
-    gettimeofday(&start, NULL);
-        ARGS *arg_ = static_cast<ARGS*> (arg);
+    ARGS *arg_ = static_cast<ARGS*> (arg);
+    if(arg_->cur_thread == arg_->n_threads - 1) gettimeofday(&start, NULL);
     flag = solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res);
-    if(flag != -1) gettimeofday(&end, NULL);
-    sec = (end.tv_sec - start.tv_sec);
-    sec = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
-    sec /= 1e6;
+    if(arg_->cur_thread == arg_->n_threads - 1) if(flag != -1) gettimeofday(&end, NULL);
+    if(arg_->cur_thread == arg_->n_threads - 1)sec = (end.tv_sec - start.tv_sec);
+    if(arg_->cur_thread == arg_->n_threads - 1)sec = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
+    if(arg_->cur_thread == arg_->n_threads - 1)sec /= 1e6;
 	return NULL;
 }
 
