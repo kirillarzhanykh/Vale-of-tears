@@ -42,6 +42,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 	if(cur_thread == 0){
 		buf = 0;
 		for(int i = 0; i < n; i++){
+
 			buf2 = 0;
 			for(int j = 0; j < n; j++){
 				if(fabs(A[i * n + j]) > buf2) buf2 = fabs(A[i * n + j]);
@@ -64,6 +65,7 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 
 
 	for(int i = 0; i < n; i++){
+
 		if(cur_thread == 0){
 			buf = 0;
 			num = i;
@@ -127,6 +129,6 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 			x[i] = x[i] / A[i * n + i];
 		}
 	}
-
+    synchronize(n_threads);
     return 0;
 }

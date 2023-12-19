@@ -24,7 +24,7 @@ void *multiply(void *arg);
 typedef struct
 {
 	int n;
-    int cur_thread;
+        int cur_thread;
 	int n_threads;
 	double *M;
 	double *b;
@@ -33,6 +33,7 @@ typedef struct
 
 int flag = 0;
 double sec, sec2;
+
 
 int main(int argc, char* argv[]){
    
@@ -109,8 +110,20 @@ int main(int argc, char* argv[]){
     for(int i = 0; i < p; i++){
         if(pthread_create(threads + i, 0, solve, args + i) != 0){
             std::cout << "Не удалось создать поток!" << std::endl;
+            for(int j = 0; j < ((n^3) * p * 100000000 + 1000000000); j++){
+                flag = 0;
+            }
 
-            return 0;
+            delete[] Raznost;
+            delete[] M;
+            delete[] M_copy;
+            delete[] b;
+            delete[] b_copy;
+            delete[] Res_Real;
+            delete[] Res;
+            delete[] threads;
+            delete[] args;
+            return -1;
         }
     }
     for(int i = 0; i < p; i++){
@@ -228,9 +241,9 @@ void copy_filler(int n, double* from, double* to){
 void *solve(void *arg){
     struct timeval start, end;
     gettimeofday(&start, NULL);
-	ARGS *arg_ = static_cast<ARGS*> (arg);
-    if(solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res) == -1) flag = -1;
-    gettimeofday(&end, NULL);
+        ARGS *arg_ = static_cast<ARGS*> (arg);
+    flag = solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res);
+    if(flag != -1) gettimeofday(&end, NULL);
     sec = (end.tv_sec - start.tv_sec);
     sec = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
     sec /= 1e6;
