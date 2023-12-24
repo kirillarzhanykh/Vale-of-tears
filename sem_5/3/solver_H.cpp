@@ -34,7 +34,7 @@ void synchronize(int total_threads){
 	pthread_mutex_unlock(&mutex);
 }
 
-int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x){
+int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x, int* TERMINATOR){
     long double buf, buf2;
     int num = 0;
 	int chunk;
@@ -65,6 +65,8 @@ int solver(int n, int cur_thread, int n_threads, double* A, double* b, double* x
 
 
 	for(int i = 0; i < n; i++){
+
+		if(TERMINATOR[0] == -1) return 0;
 
 		if(cur_thread == 0){
 			buf = 0;

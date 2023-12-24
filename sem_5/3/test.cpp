@@ -24,11 +24,12 @@ void *multiply(void *arg);
 typedef struct
 {
 	int n;
-        int cur_thread;
+    int cur_thread;
 	int n_threads;
 	double *M;
 	double *b;
 	double *Res;
+    int *TERMINATOR;
 } ARGS;
 
 int flag = 0;
@@ -98,6 +99,9 @@ int main(int argc, char* argv[]){
     ARGS* args;
     args = new ARGS[p];
 
+    int TERMINATOR[1];
+    TERMINATOR[0] = 0;
+
     for(int i = 0; i < p; i++){
         args[i].n = n;
         args[i].cur_thread = i;
@@ -105,12 +109,14 @@ int main(int argc, char* argv[]){
         args[i].M = M_copy;
         args[i].b = b_copy;
         args[i].Res = Res;
+        args[i].TERMINATOR = TERMINATOR;
     }
 
     for(int i = 0; i < p; i++){
         if(pthread_create(threads + i, 0, solve, args + i) != 0){
+            TERMINATOR[0] = -1;
             std::cout << "Не удалось создать поток!" << std::endl;
-            for(int j = 0; j < ((n^3) * p * 100000000 + 1000000000); j++){
+            for(int j = 0; j < (n * p * 100000); j++){
                 flag = 0;
             }
 
@@ -242,7 +248,7 @@ void *solve(void *arg){
     struct timeval start, end;
     ARGS *arg_ = static_cast<ARGS*> (arg);
     if(arg_->cur_thread == arg_->n_threads - 1) gettimeofday(&start, NULL);
-    flag = solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res);
+    flag = solver(arg_->n, arg_->cur_thread, arg_->n_threads, arg_->M, arg_->b, arg_->Res, arg_->TERMINATOR);
     if(arg_->cur_thread == arg_->n_threads - 1) if(flag != -1) gettimeofday(&end, NULL);
     if(arg_->cur_thread == arg_->n_threads - 1)sec = (end.tv_sec - start.tv_sec);
     if(arg_->cur_thread == arg_->n_threads - 1)sec = ((sec * 1e6) + end.tv_usec) - (start.tv_usec);
