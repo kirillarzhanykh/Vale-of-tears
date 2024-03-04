@@ -4,7 +4,7 @@
 #define EPS 10e-17
 
 int solver(int n, double* A, double* b, double* x){
-    long double buf, buf2;
+    double buf, buf2;
     int num = 0;
     // Нормируем матрицу
     buf = 0;
