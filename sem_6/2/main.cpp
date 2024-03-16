@@ -7,13 +7,11 @@ x = {1, 2, 3, 4, 5} ,
 найти максимальное отклонение интерполяции от этой функции 
 на отрезке [ 1, 5] 
 и сравнить его со значением верхней оценки для соответствующего метода интерполяции.
-
 */
 
 #include <fstream>
 #include <iostream>
 #include <cmath>
-#include "solver_H.h"
 
 double max_dev(double left_a, double right_b, double p0, double p1, double p2, double p3, double eps);
 
@@ -35,7 +33,7 @@ int main(void){
     double** polynomials;
     polynomials = new double *[4]; //4 многочлена
     for(int i = 0; i < 4; i++){
-        polynomials[i] = new double [4]; //4 коэффициента многолчена
+        polynomials[i] = new double [4]; //4 коэффициента многочлена
        
         segment = points_values_derivatives[i + 1][0] - points_values_derivatives[i][0];
         difference = (points_values_derivatives[i + 1][1] - points_values_derivatives[i][1])/segment;
@@ -43,8 +41,6 @@ int main(void){
         polynomials[i][1] = points_values_derivatives[i][2];
         polynomials[i][2] = (- 2 * points_values_derivatives[i][2] - points_values_derivatives[i + 1][2] + 3 * difference)/segment;
         polynomials[i][3] = (points_values_derivatives[i][2] + points_values_derivatives[i + 1][2] - 2 * difference)/(segment * segment);
-        
-
     }
 
     std::ofstream dataFile("data.txt");
@@ -125,7 +121,6 @@ int main(void){
     delete[] points_values_derivatives;
 
     return 0;
-
 }
 
 
@@ -137,7 +132,6 @@ double max_dev(double left_a, double right_b, double p0, double p1, double p2, d
     double x2 = b - phi * (b - a);
     double y1, y2;
     
-
     for(int i = 0; i < 1000; i++){
         y1 = fabs((exp(x1) / (2 * x1) + pow(x1, 5) * log(x1)) - (p0 + p1 * (x1 - left_a) + p2 * pow((x1 - left_a), 2) + p3 * pow((x1 - left_a), 3)));
         y2 = fabs((exp(x2) / (2 * x2) + pow(x2, 5) * log(x2)) - (p0 + p1 * (x2 - left_a) + p2 * pow((x2 - left_a), 2) + p3 * pow((x2 - left_a), 3)));
