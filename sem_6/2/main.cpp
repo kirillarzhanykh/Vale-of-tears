@@ -2,6 +2,8 @@
 exp(x) / (2x) + x^5 Log(x) , 
 ( её производная равна exp(x) * (x - 1) / (2x^2) + x^4 (5 Log(x) + 1) )
 четвертая производная: (12 E^x)/x^5 - (12 E^x)/x^4 + (6 E^x)/x^3 - (2 E^x)/x^2 + E^x/(2 x) + 154 x + 120 x Log[x]
+пятая производная: 274 - (60 E^x)/x^6 + (60 E^x)/x^5 - (30 E^x)/x^4 + (10 E^x)/x^3 - (
+ 5 E^x)/(2 x^2) + E^x/(2 x) + 120 Log[x]
 проходящую через точки с координатами 
 x = {1, 2, 3, 4, 5} , 
 найти максимальное отклонение интерполяции от этой функции 
@@ -90,15 +92,17 @@ int main(void){
     scriptFile << "set yrange[f(1) : f(5)]\n";
     scriptFile << "set title 'Интерполяция сплайнами Эрмита'\n";
     scriptFile << "plot f(x) lw 4 lc rgb 'green',\
-                        p_1(x) lw 2 lc rgb 'red',\
-                        p_2(x) lw 2 lc rgb 'blue',\
-                        p_3(x) lw 2 lc rgb 'yellow',\
-                        p_4(x) lw 2 lc rgb 'black',\
+                        [x = 1:2] p_1(x) lw 2 lc rgb 'red',\
+                        [x = 2:3] p_2(x) lw 2 lc rgb 'blue',\
+                        [x = 3:4] p_3(x) lw 2 lc rgb 'yellow',\
+                        [x = 4:5] p_4(x) lw 2 lc rgb 'black',\
                         'data.txt' using 1:2 with points title 'key points' lc rgb 'black'\n";
     scriptFile.close();
 
     system("gnuplot plot_script.gp");
 
+    // FindMaximum[{274 - (60 E^x)/x^6 + (60 E^x)/x^5 - (30 E^x)/x^4 + (10 E^x)/x^3 - (5 E^x)/(2 x^2) + E^x/(2 x) + 120 Log[x], 1 <= x <= 5}, x]
+    // {474.161, {x -> 5.}}
     x = 5;
     double max_value = exp(x)*(12/pow(x, 5) - 12/pow(x, 4) + 6/pow(x, 3) - 2/pow(x, 2) + 1/(2 * x)) + 154 * x + 120 * x * log(x);
     double max_deviation = max_value / (4*3*2*2*2*2*2);

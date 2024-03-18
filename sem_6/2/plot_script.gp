@@ -31,4 +31,4 @@ set grid
 set xrange[1 : 5]
 set yrange[f(1) : f(5)]
 set title 'Интерполяция сплайнами Эрмита'
-plot f(x) lw 4 lc rgb 'green',                        p_1(x) lw 2 lc rgb 'red',                        p_2(x) lw 2 lc rgb 'blue',                        p_3(x) lw 2 lc rgb 'yellow',                        p_4(x) lw 2 lc rgb 'black',                        'data.txt' using 1:2 with points title 'key points' lc rgb 'black'
+plot f(x) lw 4 lc rgb 'green',                        [x = 1:2] p_1(x) lw 2 lc rgb 'red',                        [x = 2:3] p_2(x) lw 2 lc rgb 'blue',                        [x = 3:4] p_3(x) lw 2 lc rgb 'yellow',                        [x = 4:5] p_4(x) lw 2 lc rgb 'black',                        'data.txt' using 1:2 with points title 'key points' lc rgb 'black'
