@@ -25,10 +25,11 @@ c_4 = 1116.32
 d_4 = 466.053
 p_4(x) = a_4 + b_4 * (x - x_4) + c_4 * (x - x_4)**2 + d_4 * (x - x_4)**3
 f(x) = exp(x) / (2 * x) + x**5 * log(x)
+g(x) = 274 - (60 * exp(x))/x**6 + (60 * exp(x))/x**5 - (30 * exp(x))/x**4 + (10 * exp(x))/x**3 - (5 * exp(x))/(2 * x**2) + exp(x)/(2 * x) + 120 * log(x)
 set xlabel 'x'
 set ylabel 'y'
 set grid
 set xrange[1 : 5]
 set yrange[f(1) : f(5)]
 set title 'Интерполяция сплайнами Эрмита'
-plot f(x) lw 4 lc rgb 'green',                        [x = 1:2] p_1(x) lw 2 lc rgb 'red',                        [x = 2:3] p_2(x) lw 2 lc rgb 'blue',                        [x = 3:4] p_3(x) lw 2 lc rgb 'yellow',                        [x = 4:5] p_4(x) lw 2 lc rgb 'black',                        'data.txt' using 1:2 with points title 'key points' lc rgb 'black'
+plot f(x) lw 4 lc rgb 'green',                        g(x) lw 4 lc rgb 'purple',                        [x = 1:2] p_1(x) lw 2 lc rgb 'red',                        [x = 2:3] p_2(x) lw 2 lc rgb 'blue',                        [x = 3:4] p_3(x) lw 2 lc rgb 'yellow',                        [x = 4:5] p_4(x) lw 2 lc rgb 'black',                        'data.txt' using 1:2 with points title 'key points' lc rgb 'black'

@@ -85,6 +85,7 @@ int main(void){
     scriptFile << "p_4(x) = a_4 + b_4 * (x - x_4) + c_4 * (x - x_4)**2 + d_4 * (x - x_4)**3\n";
 
     scriptFile << "f(x) = exp(x) / (2 * x) + x**5 * log(x)\n";
+    scriptFile << "g(x) = 274 - (60 * exp(x))/x**6 + (60 * exp(x))/x**5 - (30 * exp(x))/x**4 + (10 * exp(x))/x**3 - (5 * exp(x))/(2 * x**2) + exp(x)/(2 * x) + 120 * log(x)\n";
     scriptFile << "set xlabel 'x'\n";
     scriptFile << "set ylabel 'y'\n";
     scriptFile << "set grid\n";
@@ -92,6 +93,7 @@ int main(void){
     scriptFile << "set yrange[f(1) : f(5)]\n";
     scriptFile << "set title 'Интерполяция сплайнами Эрмита'\n";
     scriptFile << "plot f(x) lw 4 lc rgb 'green',\
+                        g(x) lw 4 lc rgb 'purple',\
                         [x = 1:2] p_1(x) lw 2 lc rgb 'red',\
                         [x = 2:3] p_2(x) lw 2 lc rgb 'blue',\
                         [x = 3:4] p_3(x) lw 2 lc rgb 'yellow',\
