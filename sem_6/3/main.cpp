@@ -104,9 +104,35 @@ int main(void){
     }
     find_vector(3, A, v3);
     
-    
-    
+    double dysp = 0;
+    for(int i = 0; i < 25; i++){
+        dysp += points[i][0] * points[i][0];
+        dysp += points[i][1] * points[i][1];
+        dysp += points[i][2] * points[i][2];
+    }
 
+    double dysp1 = 0;
+    for(int i = 0; i < 25; i++){
+        buf = points[i][0] * v1[0] + points[i][1] * v1[1] + points[i][2] * v1[2];
+        dysp1 += buf * buf;
+    }
+
+    double dysp2 = 0;
+    for(int i = 0; i < 25; i++){
+        buf = points[i][0] * v2[0] + points[i][1] * v2[1] + points[i][2] * v2[2];
+        dysp2 += buf * buf;
+    }
+
+    double dysp3 = 0;
+    for(int i = 0; i < 25; i++){
+        buf = points[i][0] * v3[0] + points[i][1] * v3[1] + points[i][2] * v3[2];
+        dysp3 += buf * buf;
+    }
+
+    std::cout << "Квадрат дисперсии: " << dysp << std::endl;
+    std::cout << "Квадрат дисперсии вдоль первой компоненты: " << dysp1 << std::endl;
+    std::cout << "Квадрат дисперсии вдоль второй компоненты: " << dysp2 << std::endl;
+    std::cout << "Квадрат дисперсии вдоль третьей компоненты: " << dysp3 << std::endl;
 
     
     std::ofstream scriptFile("plot_script.gp");
