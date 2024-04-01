@@ -1,22 +1,25 @@
 set terminal pngcairo enhanced color size 1000,1000
 set output 'PCA.png'
-x0 = 1.71716
-y0 = 2.28284
-z0 = 1.35951
-x1 = 2.77266
-y1 = 2.67687
-z1 = 1.07086
-x2 = -0.282101
-y2 = -0.476602
-z2 = 1.92179
+x1 = 0.693164
+y1 = 0.669218
+z1 = 0.267716
+x2 = -0.141051
+y2 = -0.238301
+z2 = 0.960894
 x3 = -0.706844
 y3 = 0.703818
 z3 = 0.070788
+arcsin1 = 15.5284
+arccos1 = 43.993
+arcsin2 = 73.9238
+arccos2 = 120.621
+arcsin3 = 4.05925
+arccos3 = 135.123
 set xlabel 'x'
 set ylabel 'y'
 set zlabel 'z'
-set view 50, 200
-set arrow 1 from x0, y0, z0 to x0 + x1, y0 + y1, z0 + z1 lc rgb 'blue'
-set arrow 2 from x0, y0, z0 to x0 + x2, y0 + y2, z0 + z2 lc rgb 'red'
-set arrow 3 from x0, y0, z0 to x0 + x3, y0 + y3, z0 + z3 lc rgb 'green'
-splot -(((x - x0)*x3 + (y - y0)*y3)/z3 + z0) title 'approximative plane' lc rgb 'grey',                    'data.txt' using 1:2:3 with points title 'points' lc rgb 'black'
+set view 90 - arcsin2, arccos2
+set arrow 1 from 0, 0, 0 to x1, y1, z1 lc rgb 'blue'
+set arrow 2 from 0, 0, 0 to x2, y2, z2 lc rgb 'red'
+set arrow 3 from 0, 0, 0 to x3, y3, z3 lc rgb 'green'
+splot -((x*x3 + y*y3)/z3) title 'approximative plane' lc rgb 'grey',                    'data2.txt' using 1:2:3 with points title 'points' lc rgb 'black'

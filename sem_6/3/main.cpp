@@ -39,12 +39,24 @@ int main(void){
     new_zero[0] /= 25;
     new_zero[1] /= 25;
     new_zero[2] /= 25;
+    std::cout << new_zero[0] << " " << new_zero[1] << " "<< new_zero[2]<<std::endl;
 
     for(int i = 0; i < 25; i++){
         points[i][0] -= new_zero[0];
         points[i][1] -= new_zero[1];
         points[i][2] -= new_zero[2];
     }
+
+    std::ofstream dataFile2("data2.txt");
+
+    for(int i = 0; i < 25; i++){
+        dataFile2 << points[i][0] << " ";
+        dataFile2 << points[i][1] << " ";
+        dataFile2 << points[i][2] << "\n";
+
+    }
+
+    dataFile2.close();
 
     double cov[9];
 
@@ -61,7 +73,9 @@ int main(void){
             }
             cov[3 * k + m] /= 24;
             A[3 * k + m] = cov[3 * k + m];
+            std::cout << cov[3 * k + m] << " " ;
         }
+        std::cout << std::endl;
     }
     
     eigenvalues(3, A, B, EigenValues, 1e-17);
@@ -129,39 +143,43 @@ int main(void){
         dysp3 += buf * buf;
     }
 
-    std::cout << "Квадрат дисперсии: " << dysp << std::endl;
-    std::cout << "Квадрат дисперсии вдоль первой компоненты: " << dysp1 << std::endl;
-    std::cout << "Квадрат дисперсии вдоль второй компоненты: " << dysp2 << std::endl;
-    std::cout << "Квадрат дисперсии вдоль третьей компоненты: " << dysp3 << std::endl;
+    std::cout << "Квадрат: " << dysp << std::endl;
+    std::cout << "Квадрат дисперсии вдоль первой компоненты: " << dysp1 << " " << dysp1/dysp*100 << "%" << std::endl;
+    std::cout << "Квадрат дисперсии вдоль второй компоненты: " << dysp2 << " " << dysp2/dysp*100 << "%"  << std::endl;
+    std::cout << "Квадрат дисперсии вдоль третьей компоненты: " << dysp3 << " " << dysp3/dysp*100 << "%"  << std::endl;
 
     
     std::ofstream scriptFile("plot_script.gp");
     scriptFile << "set terminal pngcairo enhanced color size 1000,1000\n";
     scriptFile << "set output 'PCA.png'\n";
 
-    scriptFile << "x0 = " << new_zero[0] << "\n";
-    scriptFile << "y0 = " << new_zero[1] << "\n";
-    scriptFile << "z0 = " << new_zero[2] << "\n";
-
-    scriptFile << "x1 = " << 4 * v1[0] << "\n";
-    scriptFile << "y1 = " << 4 * v1[1] << "\n";
-    scriptFile << "z1 = " << 4 * v1[2] << "\n";
-    scriptFile << "x2 = " << 2 * v2[0] << "\n";
-    scriptFile << "y2 = " << 2 * v2[1] << "\n";
-    scriptFile << "z2 = " << 2 * v2[2] << "\n";
+    scriptFile << "x1 = " << v1[0] << "\n";
+    scriptFile << "y1 = " << v1[1] << "\n";
+    scriptFile << "z1 = " << v1[2] << "\n";
+    scriptFile << "x2 = " << v2[0] << "\n";
+    scriptFile << "y2 = " << v2[1] << "\n";
+    scriptFile << "z2 = " << v2[2] << "\n";
     scriptFile << "x3 = " << v3[0] << "\n";
     scriptFile << "y3 = " << v3[1] << "\n";
     scriptFile << "z3 = " << v3[2] << "\n";
 
+    scriptFile << "arcsin1 = " << asin(v1[2])/(2*M_PI)*360 << "\n";
+    scriptFile << "arccos1 = " << acos(v1[0]/cos(asin(v1[2])))/(2*M_PI)*360 << "\n";
+    scriptFile << "arcsin2 = " << asin(v2[2])/(2*M_PI)*360 << "\n";
+    scriptFile << "arccos2 = " << acos(v2[0]/cos(asin(v2[2])))/(2*M_PI)*360 << "\n";
+    scriptFile << "arcsin3 = " << asin(v3[2])/(2*M_PI)*360 << "\n";
+    scriptFile << "arccos3 = " << acos(v3[0]/cos(asin(v3[2])))/(2*M_PI)*360 << "\n";
+
+
     scriptFile << "set xlabel 'x'\n";
     scriptFile << "set ylabel 'y'\n";
     scriptFile << "set zlabel 'z'\n";
-    scriptFile << "set view 50, 200\n";
-    scriptFile << "set arrow 1 from x0, y0, z0 to x0 + x1, y0 + y1, z0 + z1 lc rgb 'blue'\n";
-    scriptFile << "set arrow 2 from x0, y0, z0 to x0 + x2, y0 + y2, z0 + z2 lc rgb 'red'\n";
-    scriptFile << "set arrow 3 from x0, y0, z0 to x0 + x3, y0 + y3, z0 + z3 lc rgb 'green'\n";
-    scriptFile << "splot -(((x - x0)*x3 + (y - y0)*y3)/z3 + z0) title 'approximative plane' lc rgb 'grey',\
-                    'data.txt' using 1:2:3 with points title 'points' lc rgb 'black'\n";
+    scriptFile << "set view 90 - arcsin2, arccos2\n";
+    scriptFile << "set arrow 1 from 0, 0, 0 to x1, y1, z1 lc rgb 'blue'\n";
+    scriptFile << "set arrow 2 from 0, 0, 0 to x2, y2, z2 lc rgb 'red'\n";
+    scriptFile << "set arrow 3 from 0, 0, 0 to x3, y3, z3 lc rgb 'green'\n";
+    scriptFile << "splot -((x*x3 + y*y3)/z3) title 'approximative plane' lc rgb 'grey',\
+                    'data2.txt' using 1:2:3 with points title 'points' lc rgb 'black'\n";
     scriptFile.close();
 
     system("gnuplot plot_script.gp");
