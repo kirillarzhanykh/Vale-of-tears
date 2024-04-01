@@ -39,7 +39,7 @@ int main(void){
     new_zero[0] /= 25;
     new_zero[1] /= 25;
     new_zero[2] /= 25;
-    std::cout << new_zero[0] << " " << new_zero[1] << " "<< new_zero[2]<<std::endl;
+    //std::cout << new_zero[0] << " " << new_zero[1] << " "<< new_zero[2]<<std::endl;
 
     for(int i = 0; i < 25; i++){
         points[i][0] -= new_zero[0];
@@ -73,9 +73,9 @@ int main(void){
             }
             cov[3 * k + m] /= 24;
             A[3 * k + m] = cov[3 * k + m];
-            std::cout << cov[3 * k + m] << " " ;
+            //std::cout << cov[3 * k + m] << " " ;
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
     
     eigenvalues(3, A, B, EigenValues, 1e-17);
@@ -174,12 +174,14 @@ int main(void){
     scriptFile << "set xlabel 'x'\n";
     scriptFile << "set ylabel 'y'\n";
     scriptFile << "set zlabel 'z'\n";
-    scriptFile << "set view 90 - arcsin2, arccos2\n";
+    scriptFile << "set xrange[-8: 8]\n";
+    scriptFile << "set yrange[-8: 8]\n";
+    scriptFile << "set zrange[-8: 8]\n";
+    scriptFile << "set view 90 - arcsin3, 90 + arccos3\n";
     scriptFile << "set arrow 1 from 0, 0, 0 to x1, y1, z1 lc rgb 'blue'\n";
     scriptFile << "set arrow 2 from 0, 0, 0 to x2, y2, z2 lc rgb 'red'\n";
     scriptFile << "set arrow 3 from 0, 0, 0 to x3, y3, z3 lc rgb 'green'\n";
-    scriptFile << "splot -((x*x3 + y*y3)/z3) title 'approximative plane' lc rgb 'grey',\
-                    'data2.txt' using 1:2:3 with points title 'points' lc rgb 'black'\n";
+    scriptFile << "splot 'data2.txt' using 1:2:3 with points title 'points' lc rgb 'black'\n";
     scriptFile.close();
 
     system("gnuplot plot_script.gp");

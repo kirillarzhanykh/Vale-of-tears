@@ -18,8 +18,11 @@ arccos3 = 135.123
 set xlabel 'x'
 set ylabel 'y'
 set zlabel 'z'
-set view 90 - arcsin2, arccos2
+set xrange[-10: 10]
+set yrange[-10: 10]
+set zrange[-10: 10]
+set view 90 - arcsin3, 90 + arccos3
 set arrow 1 from 0, 0, 0 to x1, y1, z1 lc rgb 'blue'
 set arrow 2 from 0, 0, 0 to x2, y2, z2 lc rgb 'red'
 set arrow 3 from 0, 0, 0 to x3, y3, z3 lc rgb 'green'
-splot -((x*x3 + y*y3)/z3) title 'approximative plane' lc rgb 'grey',                    'data2.txt' using 1:2:3 with points title 'points' lc rgb 'black'
+splot 'data2.txt' using 1:2:3 with points title 'points' lc rgb 'black'
