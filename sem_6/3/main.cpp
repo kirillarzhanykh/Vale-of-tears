@@ -177,7 +177,7 @@ int main(void){
     scriptFile << "set xrange[-8: 8]\n";
     scriptFile << "set yrange[-8: 8]\n";
     scriptFile << "set zrange[-8: 8]\n";
-    scriptFile << "set view 90 - arcsin3, 90 + arccos3\n";
+    scriptFile << "set view 90 - arcsin1, 90 + arccos1\n";
     scriptFile << "set arrow 1 from 0, 0, 0 to x1, y1, z1 lc rgb 'blue'\n";
     scriptFile << "set arrow 2 from 0, 0, 0 to x2, y2, z2 lc rgb 'red'\n";
     scriptFile << "set arrow 3 from 0, 0, 0 to x3, y3, z3 lc rgb 'green'\n";

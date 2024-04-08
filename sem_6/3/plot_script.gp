@@ -18,10 +18,10 @@ arccos3 = 135.123
 set xlabel 'x'
 set ylabel 'y'
 set zlabel 'z'
-set xrange[-10: 10]
-set yrange[-10: 10]
-set zrange[-10: 10]
-set view 90 - arcsin3, 90 + arccos3
+set xrange[-8: 8]
+set yrange[-8: 8]
+set zrange[-8: 8]
+set view 90 - arcsin1, 90 + arccos1
 set arrow 1 from 0, 0, 0 to x1, y1, z1 lc rgb 'blue'
 set arrow 2 from 0, 0, 0 to x2, y2, z2 lc rgb 'red'
 set arrow 3 from 0, 0, 0 to x3, y3, z3 lc rgb 'green'
