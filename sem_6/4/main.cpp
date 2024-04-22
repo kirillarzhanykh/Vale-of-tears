@@ -1,88 +1,151 @@
 
-/* Построить линейную интерполяцию x^3 в линейном пространстве
+/* Приближение функции, заданной в ромбе, 
+конечными элементами степени 2 методом наименьших квадратов
 
-< Cot(x)/2 + Sin(x)^2, Cot(x)/8, -x + 16x^2 / Pi, x >
-через точки
-{ -Pi/4, Pi/4, 3*Pi/2, Pi/2 }
+a*x^2 + b*xy + c*y^2 + d*x + e*y + f
 
 */
 
 #include <fstream>
+#include <iostream>
 #include <cmath>
 #include "solver_H.h"
 
-int main(void){
-    double x;
-    double* points;
-    points = new double[4];
-    points[0] = - M_PI / 4;
-    points[1] = M_PI / 4;
-    points[2] = 3 * M_PI / 2;
-    points[3] = M_PI / 2;
+double function(double x, double y);
 
-    double* Res;
-    Res = new double[4];
+int interpolation(int n, double** coeff, double x, double y);
 
-    double* b;
-    b = new double[4];
-    for(int i = 0; i < 4; i++){
-        x = points[i];
-        b[i] = pow(x, 3);
-    }
-
-    double* A;
-    A = new double[4*4];
-    for(int i = 0; i < 4; i++){
-        x = points[i];
-        A[i * 4] = cos(x) / (2 * sin(x)) + pow(sin(x), 2);
-        A[i * 4 + 1] = cos(x) / (8 * sin(x));
-        A[i * 4 + 2] = -x + 16 * pow(x, 2) / M_PI;
-        A[i * 4 + 3] = x;
-        
-    }
-
-    if(solver(4, A, b, Res) == -1){
-        return -1;
-    }
-
-    std::ofstream dataFile("data.txt");
-    for (int i = 0; i < 4; i++){
-        x = points[i];
-        double y_interpolation = Res[0] * (cos(x) / (2 * sin(x)) + pow(sin(x), 2)) +
-                                + Res[1] * (cos(x) / (8 * sin(x))) +
-                                + Res[2] * (-x + 16 * pow(x, 2) / M_PI) +
-                                + Res[3] * (x);
-        double y_cubed = pow(x, 3);
-        dataFile << x << " " << y_interpolation << " " << y_cubed << "\n";
+void triangle_interpol(double x1, double y1, double x2, double y2, double x3, double y3, double* coeff);
     
+
+int main(void){
+    int n = 1;
+    std::cin >> n;
+    if(n < 1) return -1;
+    double** polynomials;
+    polynomials = new double *[n]; 
+    for(int i = 0; i < 4 * n; i++){
+        polynomials[i] = new double [6]; 
     }
-    dataFile.close();
 
-    std::ofstream scriptFile("plot_script.gp");
-    scriptFile << "set terminal pngcairo enhanced color size 800,600\n";
-    scriptFile << "set output 'interpolation_plot.png'\n";
-    scriptFile << "a = " << Res[0] << "\n";
-    scriptFile << "b = " << Res[1] << "\n";
-    scriptFile << "c = " << Res[2] << "\n";
-    scriptFile << "d = " << Res[3] << "\n";
-    scriptFile << "f(x) = a * (cos(x) / (2 * sin(x)) + sin(x)**2) + b * (cos(x) / (8 * sin(x))) + c * (-x + 16 * x**2 / pi) + d * (x)\n";
-    scriptFile << "g(x) = x**3\n";
-    scriptFile << "set xlabel 'x'\n";
-    scriptFile << "set ylabel 'y'\n";
-    scriptFile << "set grid\n";
-    scriptFile << "set xrange[-pi/2: 2*pi]\n";
-    scriptFile << "set yrange[-(pi/2)**3: (2*pi)**3]\n";
-    scriptFile << "set title 'Линейная интерполяция x^3'\n";
-    scriptFile << "plot f(x) title 'Interpolation'  lc rgb 'blue',\
-                        g(x) title 'X^3'  lc rgb 'black',\
-                             'data.txt' using 1:3 with points title 'key points' lc rgb 'red'\n";
-    scriptFile.close();
+    interpolation(n, polynomials, 1, 1);
 
-    system("gnuplot plot_script.gp");
 
-    delete[] points;
-    delete[] Res;
-    delete[] b;
-    delete[] A;
+    for(int k = 0; k < 4 * n; k++){
+        delete[] polynomials[k];
+    }
+    delete[] polynomials;
     return 0;
+}
+
+double function(double x, double y){
+    return x*y;
+}
+
+int interpolation(int n, double** coeff, double x, double y){
+    for(int i = 0; i < 4 * n; i++){
+        for(int j = 0; j < 4 * n; j++){
+           
+
+            triangle_interpol(x1, y1, x2, y2, x3, y3, coeff[k]){
+     
+        }
+    }
+    return 0;
+}
+
+void triangle_interpol(double x1, double y1, double x2, double y2, double x3, double y3, double* coeff){
+    for(int j = 0; j < 6; j++){
+        coeff[j] = 0;         
+    }
+
+    double new_x1 = (10*x1 + x2 + x3)/12;
+    double new_y1 = (10*y1 + y2 + y3)/12;
+    double new_x2 = (10*x2 + x1 + x3)/12;
+    double new_y2 = (10*y2 + y1 + y3)/12;
+    double new_x3 = (10*x3 + x2 + x1)/12;
+    double new_y3 = (10*y3 + y2 + y1)/12;
+    double new_x4 = (new_x2 + new_x3)/2;
+    double new_y4 = (new_y2 + new_y3)/2;
+    double new_x5 = (new_x1 + new_x3)/2;
+    double new_y5 = (new_y1 + new_y3)/2;
+    double new_x6 = (new_x1 + new_x2)/2;
+    double new_y6 = (new_y1 + new_y2)/2;
+
+    double buf;
+    double[3] buf1;
+    double[3] buf2;
+
+    psi(new_x3, new_y3, new_x2, new_y2, new_x1, new_y1, buf1);
+    psi(new_x5, new_y5, new_x6, new_y6, new_x1, new_y1, buf2);
+    buf = function(new_x1, new_y1);
+    coeff[1] += buf*(buf1[1]*buf2[1]);
+    coeff[2] += buf*(buf1[1]*buf2[2] + buf1[2]*buf2[1]);
+    coeff[3] += buf*(buf1[2]*buf2[2]);
+    coeff[4] += buf*(buf1[1]*buf2[3] + buf1[3]*buf2[1]);
+    coeff[5] += buf*(buf1[3]*buf2[2] + buf1[2]*buf2[3]);
+    coeff[6] += buf*(buf1[3]*buf2[3]);
+
+    psi(new_x3, new_y3, new_x1, new_y1, new_x2, new_y2, buf1);
+    psi(new_x4, new_y4, new_x6, new_y6, new_x2, new_y2, buf2);
+    buf = function(new_x2, new_y2);
+    coeff[1] += buf*(buf1[1]*buf2[1]);
+    coeff[2] += buf*(buf1[1]*buf2[2] + buf1[2]*buf2[1]);
+    coeff[3] += buf*(buf1[2]*buf2[2]);
+    coeff[4] += buf*(buf1[1]*buf2[3] + buf1[3]*buf2[1]);
+    coeff[5] += buf*(buf1[3]*buf2[2] + buf1[2]*buf2[3]);
+    coeff[6] += buf*(buf1[3]*buf2[3]);
+
+    psi(new_x1, new_y1, new_x2, new_y2, new_x3, new_y3, buf1);
+    psi(new_x5, new_y5, new_x4, new_y4, new_x3, new_y3, buf2);
+    buf = function(new_x3, new_y3);
+    coeff[1] += buf*(buf1[1]*buf2[1]);
+    coeff[2] += buf*(buf1[1]*buf2[2] + buf1[2]*buf2[1]);
+    coeff[3] += buf*(buf1[2]*buf2[2]);
+    coeff[4] += buf*(buf1[1]*buf2[3] + buf1[3]*buf2[1]);
+    coeff[5] += buf*(buf1[3]*buf2[2] + buf1[2]*buf2[3]);
+    coeff[6] += buf*(buf1[3]*buf2[3]);
+
+    psi(new_x3, new_y3, new_x1, new_y1, new_x4, new_y4, buf1);
+    psi(new_x2, new_y2, new_x1, new_y1, new_x4, new_y4, buf2);
+    buf = function(new_x4, new_y4);
+    coeff[1] += buf*(buf1[1]*buf2[1]);
+    coeff[2] += buf*(buf1[1]*buf2[2] + buf1[2]*buf2[1]);
+    coeff[3] += buf*(buf1[2]*buf2[2]);
+    coeff[4] += buf*(buf1[1]*buf2[3] + buf1[3]*buf2[1]);
+    coeff[5] += buf*(buf1[3]*buf2[2] + buf1[2]*buf2[3]);
+    coeff[6] += buf*(buf1[3]*buf2[3]);
+
+    psi(new_x3, new_y3, new_x2, new_y2, new_x5, new_y5, buf1);
+    psi(new_x2, new_y2, new_x1, new_y1, new_x5, new_y5, buf2);
+    buf = function(new_x5, new_y5);
+    coeff[1] += buf*(buf1[1]*buf2[1]);
+    coeff[2] += buf*(buf1[1]*buf2[2] + buf1[2]*buf2[1]);
+    coeff[3] += buf*(buf1[2]*buf2[2]);
+    coeff[4] += buf*(buf1[1]*buf2[3] + buf1[3]*buf2[1]);
+    coeff[5] += buf*(buf1[3]*buf2[2] + buf1[2]*buf2[3]);
+    coeff[6] += buf*(buf1[3]*buf2[3]);
+
+    psi(new_x3, new_y3, new_x1, new_y1, new_x6, new_y6, buf1);
+    psi(new_x2, new_y2, new_x3, new_y3, new_x6, new_y6, buf2);
+    buf = function(new_x6, new_y6);
+    coeff[1] += buf*(buf1[1]*buf2[1]);
+    coeff[2] += buf*(buf1[1]*buf2[2] + buf1[2]*buf2[1]);
+    coeff[3] += buf*(buf1[2]*buf2[2]);
+    coeff[4] += buf*(buf1[1]*buf2[3] + buf1[3]*buf2[1]);
+    coeff[5] += buf*(buf1[3]*buf2[2] + buf1[2]*buf2[3]);
+    coeff[6] += buf*(buf1[3]*buf2[3]);
+}
+
+void psi(double x1, double y1, double x2, double y2, double x0, double y0, double* coeff){ //в (x0, y0) единица
+    coeff[1] = y2 - y1;
+    coeff[2] = x1 - x2;
+    coeff[3] = x1*(y1 - y2) + y1*(x2 - x1);
+    double buf = x0 * coeff[1] + y0 * coeff[2] + coeff[3];
+    coeff[1] /= buf;
+    coeff[2] /= buf;
+    coeff[3] /= buf;
+
+    buf = x0 * coeff[1] + y0 * coeff[2] + coeff[3];
+    std::cout << buf;
 }
