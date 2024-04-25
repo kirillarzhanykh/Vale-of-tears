@@ -19,6 +19,8 @@ void triangle_interpol(double x1, double y1, double x2, double y2, double x3, do
     
 void psi(double x1, double y1, double x2, double y2, double x0, double y0, double* coeff);
 
+double integral(int pow_x, int pow_y, double b1_x, double b2_x, double b1_y, double b1_y_mult_x, double b2_y, double b2_y_mult_x);
+
 int main(void){
     int n = 1;
     std::cin >> n;
@@ -36,8 +38,8 @@ int main(void){
 
     std::ofstream scriptFile("plot_script.gp");
     scriptFile << "set terminal pngcairo enhanced color size 1000,1000\n";
-    scriptFile << "set output 'PCA.png'\n";
-    scriptFile << "f(x, y) =  x*y*x\n";
+    scriptFile << "set output 'Triangulation.png'\n";
+    scriptFile << "f(x, y) =  x*y*x \n";
     int k;
     double d_x = 2 * x / n;
     double d_y = 2 * y / n;
@@ -48,11 +50,11 @@ int main(void){
             if(j%2 == 0){     
                 x1 = -x + d_x * (j/2);       
                 y1 = y - d_y * i; 
-                scriptFile << "p_" << k << "(x, y) =  ("<< x1 <<" < x && x < "<< x1 + d_x <<" && " << y1 - d_y <<" < y && y < "<< y1 <<") ? " << polynomials[k][0] << "*(x**2) + " << polynomials[k][1] << "*(x*y) + " << polynomials[k][2] << "*(y**2) + " << polynomials[k][3] << "*(x) + " << polynomials[k][4] << "*(y) + " << polynomials[k][5] << ": 1/0\n";
+                scriptFile << "p_" << k << "(x, y) =  ("<< x1 <<" < x && x < "<< x1 + d_x <<" && (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 << ")) < y && y < " << y1 << ") ? " << polynomials[k][0] << "*(x**2) + " << polynomials[k][1] << "*(x*y) + " << polynomials[k][2] << "*(y**2) + " << polynomials[k][3] << "*(x) + " << polynomials[k][4] << "*(y) + " << polynomials[k][5] << ": 1/0\n";
             }else{    
                 x1 = -x + d_x * ((j/2) + 1);  
                 y1 = y - d_y * i;                     
-                scriptFile << "p_" << k << "(x, y) =  ("<< x1 <<" < x && x < "<< x1 + d_x <<" && " << y1 - d_y <<" < y && y < "<< y1 <<") ? " << polynomials[k][0] << "*(x**2) + " << polynomials[k][1] << "*(x*y) + " << polynomials[k][2] << "*(y**2) + " << polynomials[k][3] << "*(x) + " << polynomials[k][4] << "*(y) + " << polynomials[k][5] << ": 1/0\n";
+                scriptFile << "p_" << k << "(x, y) =  ("<< x1 - d_x <<" < x && x < "<< x1 <<" && " << y1 - d_y << " < y && y < (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 - d_x << "))) ? " << polynomials[k][0] << "*(x**2) + " << polynomials[k][1] << "*(x*y) + " << polynomials[k][2] << "*(y**2) + " << polynomials[k][3] << "*(x) + " << polynomials[k][4] << "*(y) + " << polynomials[k][5] << ": 1/0\n";
             }
             
         }
@@ -61,6 +63,7 @@ int main(void){
     scriptFile << "set xlabel 'x'\n";
     scriptFile << "set ylabel 'y'\n";
     scriptFile << "set zlabel 'z'\n";
+    scriptFile << "unset colorbox\n";
     scriptFile << "set xrange[-" << x << ": " << x << "]\n";
     scriptFile << "set yrange[-" << y << ": " << y << "]\n";
     scriptFile << "splot f(x, y) lc rgb 'green' ";
@@ -68,7 +71,11 @@ int main(void){
     for(int i = 0; i < n; i++){
         for(int j = 0; j < 2 * n; j++){                                           
             k = i * 2 * n + j;
-            scriptFile << ", p_" << k << "(x, y) lc rgb 'red' ";
+            if(k % 2 == 0){
+                scriptFile << ", p_" << k << "(x, y) lc rgb 'red' notitle";
+            } else {
+                scriptFile << ", p_" << k << "(x, y) lc rgb 'blue' notitle";
+            }
         }
     }
     scriptFile.close();
@@ -103,7 +110,7 @@ int interpolation(int n, double** coeff, double x, double y){
                 y2 = y1;
                 x3 = x1;
                 y3 = y1 - d_y;
-            }else{                         //                       /|
+            }else{                                //                       /|
                 x1 = -x + d_x * ((j/2) + 1);      //  типа треугольник    /_|
                 y1 = y - d_y * i;
                 x2 = x1;
@@ -122,8 +129,8 @@ int interpolation(int n, double** coeff, double x, double y){
             k = i * 2 * n + j;
             triangle_interpol(new_x1, new_y1, new_x2, new_y2, new_x3, new_y3, coeff[k]);
         }
-     
     }
+
     return 0;
 }
 
@@ -214,4 +221,43 @@ void psi(double x1, double y1, double x2, double y2, double x0, double y0, doubl
     coeff[2] /= buf;
 
     buf = x0 * coeff[0] + y0 * coeff[1] + coeff[2];
+}
+
+double integral(int pow_x, int pow_y, double b1_x, double b2_x, double b1_y, double b1_y_mult_x, double b2_y, double b2_y_mult_x){ // Интеграл по трапеции x^(pow_x) * y^(pow_y)
+    double res = 0;
+    if(pow_y == 0){
+        res += (b2_y - b1_y) * (pow(b2_x, pow_x + 1) - pow(b1_x, pow_x + 1)) / (pow_x + 1);
+        res += (b2_y_mult_x - b1_y_mult_x) * (pow(b2_x, pow_x + 2) - pow(b1_x, pow_x + 2)) / (pow_x + 2);
+    }
+    if(pow_y == 1){
+        res += (b2_y * b2_y - b1_y * b1_y) * (pow(b2_x, pow_x + 1) - pow(b1_x, pow_x + 1)) / (pow_x + 1);
+        res += 2 * (b2_y_mult_x * b2_y - b1_y_mult_x * b1_y) * (pow(b2_x, pow_x + 2) - pow(b1_x, pow_x + 2)) / (pow_x + 2);
+        res += (b2_y_mult_x * b2_y_mult_x - b1_y_mult_x * b1_y_mult_x) * (pow(b2_x, pow_x + 3) - pow(b1_x, pow_x + 3)) / (pow_x + 3);
+        res /= 2;
+    }
+    if(pow_y == 2){
+        res += (b2_y * b2_y * b2_y - b1_y * b1_y * b1_y) * (pow(b2_x, pow_x + 1) - pow(b1_x, pow_x + 1)) / (pow_x + 1);
+        res += 3 * (b2_y_mult_x * b2_y * b2_y - b1_y_mult_x * b1_y * b1_y) * (pow(b2_x, pow_x + 2) - pow(b1_x, pow_x + 2)) / (pow_x + 2);
+        res += 3 * (b2_y_mult_x * b2_y_mult_x * b2_y - b1_y_mult_x * b1_y_mult_x * b1_y) * (pow(b2_x, pow_x + 3) - pow(b1_x, pow_x + 3)) / (pow_x + 3);
+        res += (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x - b1_y_mult_x * b1_y_mult_x * b1_y_mult_x) * (pow(b2_x, pow_x + 4) - pow(b1_x, pow_x + 4)) / (pow_x + 4);
+        res /= 3;
+    }
+    if(pow_y == 3){
+        res += (b2_y * b2_y * b2_y * b2_y - b1_y * b1_y * b1_y * b1_y) * (pow(b2_x, pow_x + 1) - pow(b1_x, pow_x + 1)) / (pow_x + 1);
+        res += 4 * (b2_y_mult_x * b2_y * b2_y * b2_y - b1_y_mult_x * b1_y * b1_y * b1_y) * (pow(b2_x, pow_x + 2) - pow(b1_x, pow_x + 2)) / (pow_x + 2);
+        res += 6 * (b2_y_mult_x * b2_y_mult_x * b2_y * b2_y - b1_y_mult_x * b1_y_mult_x * b1_y * b1_y) * (pow(b2_x, pow_x + 3) - pow(b1_x, pow_x + 3)) / (pow_x + 3);
+        res += 4 * (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y - b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y) * (pow(b2_x, pow_x + 4) - pow(b1_x, pow_x + 4)) / (pow_x + 4);
+        res += (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y_mult_x - b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y_mult_x) * (pow(b2_x, pow_x + 5) - pow(b1_x, pow_x + 5)) / (pow_x + 5);
+        res /= 4;
+    }
+    if(pow_y == 4){
+        res += (b2_y * b2_y * b2_y * b2_y * b2_y - b1_y * b1_y * b1_y * b1_y * b1_y) * (pow(b2_x, pow_x + 1) - pow(b1_x, pow_x + 1)) / (pow_x + 1);
+        res += 5 * (b2_y_mult_x * b2_y * b2_y * b2_y * b2_y - b1_y_mult_x * b1_y * b1_y * b1_y * b1_y) * (pow(b2_x, pow_x + 2) - pow(b1_x, pow_x + 2)) / (pow_x + 2);
+        res += 10 * (b2_y_mult_x * b2_y_mult_x * b2_y * b2_y * b2_y - b1_y_mult_x * b1_y_mult_x * b1_y * b1_y * b1_y) * (pow(b2_x, pow_x + 3) - pow(b1_x, pow_x + 3)) / (pow_x + 3);
+        res += 10 * (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y * b2_y - b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y * b1_y) * (pow(b2_x, pow_x + 4) - pow(b1_x, pow_x + 4)) / (pow_x + 4);
+        res += 5 * (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y- b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y) * (pow(b2_x, pow_x + 5) - pow(b1_x, pow_x + 5)) / (pow_x + 5);
+        res += (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y_mult_x - b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y_mult_x) * (pow(b2_x, pow_x + 5) - pow(b1_x, pow_x + 5)) / (pow_x + 5);
+        res /= 5;
+    }
+    return res;
 }
