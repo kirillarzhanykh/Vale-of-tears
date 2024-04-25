@@ -13,9 +13,9 @@ a*x^2 + b*xy + c*y^2 + d*x + e*y + f
 
 double function(double x, double y);
 
-int interpolation(int n, double** coeff, double x, double y);
+int interpolation(int n, double** coeff, double** storage, double*** triangles_phi, double x, double y);
 
-void triangle_interpol(double x1, double y1, double x2, double y2, double x3, double y3, double* coeff);
+void triangle_interpol(double x1, double y1, double x2, double y2, double x3, double y3, double* coeff, double** phi);
     
 void psi(double x1, double y1, double x2, double y2, double x0, double y0, double* coeff);
 
@@ -25,16 +25,28 @@ int main(void){
     int n = 1;
     std::cin >> n;
     if(n < 1) return -1;
-    double** polynomials;
-    polynomials = new double *[2 * n * n]; 
+    double** polynomials1;
+    double** polynomials2;
+    double*** triangles_phi;
+    polynomials1 = new double *[2 * n * n]; 
+    polynomials2 = new double *[2 * n * n]; 
+    triangles_phi = new double **[2 * n * n]; 
     for(int i = 0; i < 2 * n * n; i++){
-        polynomials[i] = new double [6]; 
+        polynomials1[i] = new double [6]; 
+        polynomials2[i] = new double [6];
+        triangles_phi[i] = new double *[6]; 
+        triangles_phi[i][0] = new double [6]; 
+        triangles_phi[i][1] = new double [6]; 
+        triangles_phi[i][2] = new double [6]; 
+        triangles_phi[i][3] = new double [6]; 
+        triangles_phi[i][4] = new double [6]; 
+        triangles_phi[i][5] = new double [6]; 
     }
 
     double x = 1;
     double y = 1;
 
-    interpolation(n, polynomials, x, y);
+    interpolation(n, polynomials1, polynomials2, triangles_phi, x, y);
 
     std::ofstream scriptFile("plot_script.gp");
     scriptFile << "set terminal pngcairo enhanced color size 1000,1000\n";
@@ -50,11 +62,11 @@ int main(void){
             if(j%2 == 0){     
                 x1 = -x + d_x * (j/2);       
                 y1 = y - d_y * i; 
-                scriptFile << "p_" << k << "(x, y) =  ("<< x1 <<" < x && x < "<< x1 + d_x <<" && (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 << ")) < y && y < " << y1 << ") ? " << polynomials[k][0] << "*(x**2) + " << polynomials[k][1] << "*(x*y) + " << polynomials[k][2] << "*(y**2) + " << polynomials[k][3] << "*(x) + " << polynomials[k][4] << "*(y) + " << polynomials[k][5] << ": 1/0\n";
+                scriptFile << "p_" << k << "(x, y) =  ("<< x1 <<" < x && x < "<< x1 + d_x <<" && (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 << ")) < y && y < " << y1 << ") ? " << polynomials2[k][0] << "*(x**2) + " << polynomials2[k][1] << "*(x*y) + " << polynomials2[k][2] << "*(y**2) + " << polynomials2[k][3] << "*(x) + " << polynomials2[k][4] << "*(y) + " << polynomials2[k][5] << ": 1/0\n";
             }else{    
                 x1 = -x + d_x * ((j/2) + 1);  
                 y1 = y - d_y * i;                     
-                scriptFile << "p_" << k << "(x, y) =  ("<< x1 - d_x <<" < x && x < "<< x1 <<" && " << y1 - d_y << " < y && y < (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 - d_x << "))) ? " << polynomials[k][0] << "*(x**2) + " << polynomials[k][1] << "*(x*y) + " << polynomials[k][2] << "*(y**2) + " << polynomials[k][3] << "*(x) + " << polynomials[k][4] << "*(y) + " << polynomials[k][5] << ": 1/0\n";
+                scriptFile << "p_" << k << "(x, y) =  ("<< x1 - d_x <<" < x && x < "<< x1 <<" && " << y1 - d_y << " < y && y < (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 - d_x << "))) ? " << polynomials2[k][0] << "*(x**2) + " << polynomials2[k][1] << "*(x*y) + " << polynomials2[k][2] << "*(y**2) + " << polynomials2[k][3] << "*(x) + " << polynomials2[k][4] << "*(y) + " << polynomials2[k][5] << ": 1/0\n";
             }
             
         }
@@ -84,9 +96,18 @@ int main(void){
 
 
     for(int i = 0; i < 2 * n * n; i++){
-        delete[] polynomials[i];
+        delete[] polynomials1[i];
+        delete[] polynomials2[i];
+        delete[] triangles_phi[i][0]; 
+        delete[] triangles_phi[i][1]; 
+        delete[] triangles_phi[i][2]; 
+        delete[] triangles_phi[i][3]; 
+        delete[] triangles_phi[i][4]; 
+        delete[] triangles_phi[i][5]; 
+        delete[] triangles_phi[i]; 
     }
-    delete[] polynomials;
+    delete[] polynomials1;
+    delete[] polynomials2;
     return 0;
 }
 
@@ -94,7 +115,7 @@ double function(double x, double y){
     return x*y*x;
 }
 
-int interpolation(int n, double** coeff, double x, double y){
+int interpolation(int n, double** coeff, double** storage, double*** triangles_phi, double x, double y){
     double d_x = 2 * x / n;
     double d_y = 2 * y / n;
     double x1, x2, x3, y1, y2, y3, new_x1, new_x2, new_x3, new_y1, new_y2, new_y3;
@@ -102,7 +123,7 @@ int interpolation(int n, double** coeff, double x, double y){
             
     for(int i = 0; i < n; i++){
         for(int j = 0; j < 2 * n; j++){
-                                                       
+                                                  
             if(j%2 == 0){                         //                    ___
                 x1 = -x + d_x * (j/2);            //  типа треугольник  | /
                 y1 = y - d_y * i;                 //                    |/
@@ -118,7 +139,7 @@ int interpolation(int n, double** coeff, double x, double y){
                 x3 = x1 - d_x;
                 y3 = y1 - d_y;
             }
-            
+
             new_x1 = (10*x1 + x2 + x3)/12;
             new_y1 = (10*y1 + y2 + y3)/12;
             new_x2 = (10*x2 + x1 + x3)/12;
@@ -127,14 +148,15 @@ int interpolation(int n, double** coeff, double x, double y){
             new_y3 = (10*y3 + y2 + y1)/12;
 
             k = i * 2 * n + j;
-            triangle_interpol(new_x1, new_y1, new_x2, new_y2, new_x3, new_y3, coeff[k]);
+
+            triangle_interpol(new_x1, new_y1, new_x2, new_y2, new_x3, new_y3, storage[k], triangles_phi[k]);
         }
     }
 
     return 0;
 }
 
-void triangle_interpol(double x1, double y1, double x2, double y2, double x3, double y3, double* coeff){
+void triangle_interpol(double x1, double y1, double x2, double y2, double x3, double y3, double* coeff, double** phi){
     for(int j = 0; j < 6; j++){
         coeff[j] = 0;         
     }
@@ -153,63 +175,100 @@ void triangle_interpol(double x1, double y1, double x2, double y2, double x3, do
     psi(x3, y3, x2, y2, x1, y1, buf1);
     psi(x5, y5, x6, y6, x1, y1, buf2);
     buf = function(x1, y1);
+    phi[0][0] = (buf1[0]*buf2[0]);
     coeff[0] += buf*(buf1[0]*buf2[0]);
+    phi[0][1] += (buf1[0]*buf2[1] + buf1[1]*buf2[0]);
     coeff[1] += buf*(buf1[0]*buf2[1] + buf1[1]*buf2[0]);
+    phi[0][2] += (buf1[1]*buf2[1]);
     coeff[2] += buf*(buf1[1]*buf2[1]);
+    phi[0][3] += (buf1[0]*buf2[2] + buf1[2]*buf2[0]);
     coeff[3] += buf*(buf1[0]*buf2[2] + buf1[2]*buf2[0]);
+    phi[0][4] += (buf1[2]*buf2[1] + buf1[1]*buf2[2]);
     coeff[4] += buf*(buf1[2]*buf2[1] + buf1[1]*buf2[2]);
+    phi[0][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 
     psi(x3, y3, x1, y1, x2, y2, buf1);
     psi(x4, y4, x6, y6, x2, y2, buf2);
     buf = function(x2, y2);
+    phi[1][0] = (buf1[0]*buf2[0]);
     coeff[0] += buf*(buf1[0]*buf2[0]);
+    phi[1][1] += (buf1[0]*buf2[1] + buf1[1]*buf2[0]);
     coeff[1] += buf*(buf1[0]*buf2[1] + buf1[1]*buf2[0]);
+    phi[1][2] += (buf1[1]*buf2[1]);
     coeff[2] += buf*(buf1[1]*buf2[1]);
+    phi[1][3] += (buf1[0]*buf2[2] + buf1[2]*buf2[0]);
     coeff[3] += buf*(buf1[0]*buf2[2] + buf1[2]*buf2[0]);
+    phi[1][4] += (buf1[2]*buf2[1] + buf1[1]*buf2[2]);
     coeff[4] += buf*(buf1[2]*buf2[1] + buf1[1]*buf2[2]);
+    phi[1][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 
     psi(x1, y1, x2, y2, x3, y3, buf1);
     psi(x5, y5, x4, y4, x3, y3, buf2);
     buf = function(x3, y3);
+    phi[2][0] = (buf1[0]*buf2[0]);
     coeff[0] += buf*(buf1[0]*buf2[0]);
+    phi[2][1] += (buf1[0]*buf2[1] + buf1[1]*buf2[0]);
     coeff[1] += buf*(buf1[0]*buf2[1] + buf1[1]*buf2[0]);
+    phi[2][2] += (buf1[1]*buf2[1]);
     coeff[2] += buf*(buf1[1]*buf2[1]);
+    phi[2][3] += (buf1[0]*buf2[2] + buf1[2]*buf2[0]);
     coeff[3] += buf*(buf1[0]*buf2[2] + buf1[2]*buf2[0]);
+    phi[2][4] += (buf1[2]*buf2[1] + buf1[1]*buf2[2]);
     coeff[4] += buf*(buf1[2]*buf2[1] + buf1[1]*buf2[2]);
+    phi[2][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 
     psi(x3, y3, x1, y1, x4, y4, buf1);
     psi(x2, y2, x1, y1, x4, y4, buf2);
     buf = function(x4, y4);
+    phi[3][0] = (buf1[0]*buf2[0]);
     coeff[0] += buf*(buf1[0]*buf2[0]);
+    phi[3][1] += (buf1[0]*buf2[1] + buf1[1]*buf2[0]);
     coeff[1] += buf*(buf1[0]*buf2[1] + buf1[1]*buf2[0]);
+    phi[3][2] += (buf1[1]*buf2[1]);
     coeff[2] += buf*(buf1[1]*buf2[1]);
+    phi[3][3] += (buf1[0]*buf2[2] + buf1[2]*buf2[0]);
     coeff[3] += buf*(buf1[0]*buf2[2] + buf1[2]*buf2[0]);
+    phi[3][4] += (buf1[2]*buf2[1] + buf1[1]*buf2[2]);
     coeff[4] += buf*(buf1[2]*buf2[1] + buf1[1]*buf2[2]);
+    phi[3][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 
     psi(x3, y3, x2, y2, x5, y5, buf1);
     psi(x2, y2, x1, y1, x5, y5, buf2);
     buf = function(x5, y5);
+    phi[4][0] = (buf1[0]*buf2[0]);
     coeff[0] += buf*(buf1[0]*buf2[0]);
+    phi[4][1] += (buf1[0]*buf2[1] + buf1[1]*buf2[0]);
     coeff[1] += buf*(buf1[0]*buf2[1] + buf1[1]*buf2[0]);
+    phi[4][2] += (buf1[1]*buf2[1]);
     coeff[2] += buf*(buf1[1]*buf2[1]);
+    phi[4][3] += (buf1[0]*buf2[2] + buf1[2]*buf2[0]);
     coeff[3] += buf*(buf1[0]*buf2[2] + buf1[2]*buf2[0]);
+    phi[4][4] += (buf1[2]*buf2[1] + buf1[1]*buf2[2]);
     coeff[4] += buf*(buf1[2]*buf2[1] + buf1[1]*buf2[2]);
+    phi[4][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 
     psi(x3, y3, x1, y1, x6, y6, buf1);
     psi(x2, y2, x3, y3, x6, y6, buf2);
     buf = function(x6, y6);
+    phi[5][0] = (buf1[0]*buf2[0]);
     coeff[0] += buf*(buf1[0]*buf2[0]);
+    phi[5][1] += (buf1[0]*buf2[1] + buf1[1]*buf2[0]);
     coeff[1] += buf*(buf1[0]*buf2[1] + buf1[1]*buf2[0]);
+    phi[5][2] += (buf1[1]*buf2[1]);
     coeff[2] += buf*(buf1[1]*buf2[1]);
+    phi[5][3] += (buf1[0]*buf2[2] + buf1[2]*buf2[0]);
     coeff[3] += buf*(buf1[0]*buf2[2] + buf1[2]*buf2[0]);
+    phi[5][4] += (buf1[2]*buf2[1] + buf1[1]*buf2[2]);
     coeff[4] += buf*(buf1[2]*buf2[1] + buf1[1]*buf2[2]);
+    phi[5][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 }
+
 
 void psi(double x1, double y1, double x2, double y2, double x0, double y0, double* coeff){ //в (x0, y0) единица
     coeff[0] = y2 - y1;
