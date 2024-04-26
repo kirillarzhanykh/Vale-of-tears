@@ -21,9 +21,15 @@ void psi(double x1, double y1, double x2, double y2, double x0, double y0, doubl
 
 double integral(int pow_x, int pow_y, double b1_x, double b2_x, double b1_y, double b1_y_mult_x, double b2_y, double b2_y_mult_x);
 
+double integral2(double* pol1, double* pol2, double b1_x, double b2_x, double b1_y, double b1_y_mult_x, double b2_y, double b2_y_mult_x);
+
 int main(void){
     int n = 1;
-    std::cin >> n;
+    double x = 1;
+    double y = 1;
+    std::cin >> n >> x >> y;
+    x = fabs(x);
+    y = fabs(y);
     if(n < 1) return -1;
     double** polynomials1;
     double** polynomials2;
@@ -43,15 +49,12 @@ int main(void){
         triangles_phi[i][5] = new double [6]; 
     }
 
-    double x = 1;
-    double y = 1;
-
     interpolation(n, polynomials1, polynomials2, triangles_phi, x, y);
 
     std::ofstream scriptFile("plot_script.gp");
     scriptFile << "set terminal pngcairo enhanced color size 1000,1000\n";
     scriptFile << "set output 'Triangulation.png'\n";
-    scriptFile << "f(x, y) =  x*y*x \n";
+    scriptFile << "f(x, y) =  ((x*y*x) + x*x) \n";
     int k;
     double d_x = 2 * x / n;
     double d_y = 2 * y / n;
@@ -62,11 +65,11 @@ int main(void){
             if(j%2 == 0){     
                 x1 = -x + d_x * (j/2);       
                 y1 = y - d_y * i; 
-                scriptFile << "p_" << k << "(x, y) =  ("<< x1 <<" < x && x < "<< x1 + d_x <<" && (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 << ")) < y && y < " << y1 << ") ? " << polynomials2[k][0] << "*(x**2) + " << polynomials2[k][1] << "*(x*y) + " << polynomials2[k][2] << "*(y**2) + " << polynomials2[k][3] << "*(x) + " << polynomials2[k][4] << "*(y) + " << polynomials2[k][5] << ": 1/0\n";
+                scriptFile << "p_" << k << "(x, y) =  ( (x/" << x << ") + (y/" << y << ") > 1 || (x/" << x << ") + (y/" << y << ") < -1 || -(x/" << x << ") + (y/" << y << ") > 1 || -(x/" << x << ") + (y/" << y << ") < -1) ? 1/0 : ("<< x1 <<" < x && x < "<< x1 + d_x << " && (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 << ")) < y && y < " << y1 << ") ? " << polynomials1[k][0] << "*(x**2) + " << polynomials1[k][1] << "*(x*y) + " << polynomials1[k][2] << "*(y**2) + " << polynomials1[k][3] << "*(x) + " << polynomials1[k][4] << "*(y) + " << polynomials1[k][5] << ": 1/0\n";
             }else{    
                 x1 = -x + d_x * ((j/2) + 1);  
                 y1 = y - d_y * i;                     
-                scriptFile << "p_" << k << "(x, y) =  ("<< x1 - d_x <<" < x && x < "<< x1 <<" && " << y1 - d_y << " < y && y < (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 - d_x << "))) ? " << polynomials2[k][0] << "*(x**2) + " << polynomials2[k][1] << "*(x*y) + " << polynomials2[k][2] << "*(y**2) + " << polynomials2[k][3] << "*(x) + " << polynomials2[k][4] << "*(y) + " << polynomials2[k][5] << ": 1/0\n";
+                scriptFile << "p_" << k << "(x, y) =  ( (x/" << x << ") + (y/" << y << ") > 1 || (x/" << x << ") + (y/" << y << ") < -1 || -(x/" << x << ") + (y/" << y << ") > 1 || -(x/" << x << ") + (y/" << y << ") < -1) ? 1/0 : ("<< x1 - d_x <<" < x && x < "<< x1 <<" && " << y1 - d_y << " < y && y < (" << y1 - d_y << " + " << d_y / d_x << "*(x - " << x1 - d_x << "))) ? " << polynomials1[k][0] << "*(x**2) + " << polynomials1[k][1] << "*(x*y) + " << polynomials1[k][2] << "*(y**2) + " << polynomials1[k][3] << "*(x) + " << polynomials1[k][4] << "*(y) + " << polynomials1[k][5] << ": 1/0\n";
             }
             
         }
@@ -112,7 +115,7 @@ int main(void){
 }
 
 double function(double x, double y){
-    return x*y*x;
+    return (x*y*x) + x*x;
 }
 
 int interpolation(int n, double** coeff, double** storage, double*** triangles_phi, double x, double y){
@@ -150,6 +153,91 @@ int interpolation(int n, double** coeff, double** storage, double*** triangles_p
             k = i * 2 * n + j;
 
             triangle_interpol(new_x1, new_y1, new_x2, new_y2, new_x3, new_y3, storage[k], triangles_phi[k]);
+        }
+    }
+
+    double A[36];
+    double b[6];
+    double X[6];
+    double buf;
+    double b1_x;
+    double b2_x;
+    double b1_y;
+    double b1_y_mult_x;
+    double b2_y;
+    double b2_y_mult_x;
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < 2 * n; j++){
+                                                  
+            if(j%2 == 0){                         //                    ___
+                x1 = -x + d_x * (j/2);            //  типа треугольник  | /
+                y1 = y - d_y * i;                 //                    |/
+                x2 = x1 + d_x;
+                y2 = y1;
+                x3 = x1;
+                y3 = y1 - d_y;
+            }else{                                //                       /|
+                x1 = -x + d_x * ((j/2) + 1);      //  типа треугольник    /_|
+                y1 = y - d_y * i;
+                x2 = x1;
+                y2 = y1 - d_y;
+                x3 = x1 - d_x;
+                y3 = y1 - d_y;
+            }
+
+            new_x1 = (10*x1 + x2 + x3)/12;
+            new_y1 = (10*y1 + y2 + y3)/12;
+            new_x2 = (10*x2 + x1 + x3)/12;
+            new_y2 = (10*y2 + y1 + y3)/12;
+            new_x3 = (10*x3 + x2 + x1)/12;
+            new_y3 = (10*y3 + y2 + y1)/12;
+
+            k = i * 2 * n + j;
+
+            if(j%2 == 0){   
+                b1_x = x1;
+                b2_x = x2;
+                b1_y = y3 - x3 * d_y / d_x;
+                b1_y_mult_x = d_y / d_x;
+                b2_y = y1;
+                b2_y_mult_x = 0;    
+            } else {
+                b1_x = x2;
+                b2_x = x3;
+                b1_y = y3;
+                b1_y_mult_x = 0;
+                b2_y = y3 - x3 * d_y / d_x;
+                b2_y_mult_x = d_y / d_x;
+            }
+
+            for(int u = 0; u < 6; u++){
+                A[u * 6] = integral2(triangles_phi[k][u], triangles_phi[k][0], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                A[u * 6 + 1] = integral2(triangles_phi[k][u], triangles_phi[k][1], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                A[u * 6 + 2] = integral2(triangles_phi[k][u], triangles_phi[k][2], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                A[u * 6 + 3] = integral2(triangles_phi[k][u], triangles_phi[k][3], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                A[u * 6 + 4] = integral2(triangles_phi[k][u], triangles_phi[k][4], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                A[u * 6 + 5] = integral2(triangles_phi[k][u], triangles_phi[k][5], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                b[u] = integral2(triangles_phi[k][u], storage[k], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+            }
+            solver(6, A, b, X);
+
+            coeff[k][0] = 0;
+            coeff[k][1] = 0;
+            coeff[k][2] = 0;
+            coeff[k][3] = 0;
+            coeff[k][4] = 0;
+            coeff[k][5] = 0;
+
+            for(int u = 0; u < 6; u++){
+                buf = X[u];
+                coeff[k][0] += buf * triangles_phi[k][u][0];
+                coeff[k][1] += buf * triangles_phi[k][u][1];
+                coeff[k][2] += buf * triangles_phi[k][u][2];
+                coeff[k][3] += buf * triangles_phi[k][u][3];
+                coeff[k][4] += buf * triangles_phi[k][u][4];
+                coeff[k][5] += buf * triangles_phi[k][u][5];
+            }
         }
     }
 
@@ -318,5 +406,57 @@ double integral(int pow_x, int pow_y, double b1_x, double b2_x, double b1_y, dou
         res += (b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y_mult_x * b2_y_mult_x - b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y_mult_x * b1_y_mult_x) * (pow(b2_x, pow_x + 5) - pow(b1_x, pow_x + 5)) / (pow_x + 5);
         res /= 5;
     }
+    return res;
+}
+
+double integral2(double* pol1, double* pol2, double b1_x, double b2_x, double b1_y, double b1_y_mult_x, double b2_y, double b2_y_mult_x){  //Два многочлена степени 2 
+    double res = 0;
+    double buf;
+
+    buf = pol1[0] * pol2[0];
+    res += buf * integral(4, 0, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[2] * pol2[2];
+    res += buf * integral(0, 4, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[0] * pol2[1] + pol1[1] * pol2[0];
+    res += buf * integral(3, 1, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[2] * pol2[1] + pol1[1] * pol2[2];
+    res += buf * integral(1, 3, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[0] * pol2[2] + pol1[2] * pol2[0] + pol1[1] * pol2[1];
+    res += buf * integral(2, 2, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[0] * pol2[3] + pol1[3] * pol2[0];
+    res += buf * integral(3, 0, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[2] * pol2[4] + pol1[4] * pol2[2];
+    res += buf * integral(0, 3, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[0] * pol2[4] + pol1[4] * pol2[0] + pol1[1] * pol2[3] + pol1[3] * pol2[1];
+    res += buf * integral(2, 1, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[2] * pol2[3] + pol1[3] * pol2[2] + pol1[1] * pol2[4] + pol1[4] * pol2[1];
+    res += buf * integral(1, 2, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[0] * pol2[5] + pol1[5] * pol2[0] + pol1[3] * pol2[3];
+    res += buf * integral(2, 0, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[2] * pol2[5] + pol1[5] * pol2[2] + pol1[4] * pol2[4];
+    res += buf * integral(0, 2, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[1] * pol2[5] + pol1[5] * pol2[1] + pol1[3] * pol2[4] + pol1[4] * pol2[3];
+    res += buf * integral(1, 1, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[3] * pol2[5] + pol1[5] * pol2[3];
+    res += buf * integral(1, 0, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[4] * pol2[5] + pol1[5] * pol2[4];
+    res += buf * integral(0, 1, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
+    buf = pol1[5] * pol2[5];
+    res += buf * integral(0, 0, b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+
     return res;
 }
