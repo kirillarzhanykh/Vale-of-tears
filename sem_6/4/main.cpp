@@ -91,7 +91,6 @@ int main(void){
     scriptFile << "set xlabel 'x'\n";
     scriptFile << "set ylabel 'y'\n";
     scriptFile << "set zlabel 'z'\n";
-    scriptFile << "unset colorbox\n";
     scriptFile << "set xrange[-" << x << ": " << x << "]\n";
     scriptFile << "set yrange[-" << y << ": " << y << "]\n";
     scriptFile << "splot f(x, y) lc rgb 'green' ";
@@ -199,13 +198,6 @@ int interpolation(int n, double** coeff, double** storage, double*** triangles_p
                 x3 = x1 - d_x;
                 y3 = y1 - d_y;
             }
-
-            new_x1 = (10*x1 + x2 + x3)/12;
-            new_y1 = (10*y1 + y2 + y3)/12;
-            new_x2 = (10*x2 + x1 + x3)/12;
-            new_y2 = (10*y2 + y1 + y3)/12;
-            new_x3 = (10*x3 + x2 + x1)/12;
-            new_y3 = (10*y3 + y2 + y1)/12;
 
             k = i * 2 * n + j;
 
@@ -371,7 +363,6 @@ void triangle_interpol(double x1, double y1, double x2, double y2, double x3, do
     phi[5][5] += (buf1[2]*buf2[2]);
     coeff[5] += buf*(buf1[2]*buf2[2]);
 }
-
 
 void psi(double x1, double y1, double x2, double y2, double x0, double y0, double* coeff){ //в (x0, y0) единица
     coeff[0] = y2 - y1;
