@@ -47,6 +47,17 @@ int main(void){
         triangles_phi[i][3] = new double [6]; 
         triangles_phi[i][4] = new double [6]; 
         triangles_phi[i][5] = new double [6]; 
+        for(int j = 0; j < 6; j++){
+            polynomials1[i][j] = 0; 
+            polynomials2[i][j] = 0;   
+            triangles_phi[i][0][j] = 0;  
+            triangles_phi[i][1][j] = 0;  
+            triangles_phi[i][2][j] = 0;  
+            triangles_phi[i][3][j] = 0;  
+            triangles_phi[i][4][j] = 0;  
+            triangles_phi[i][5][j] = 0; 
+
+        }
     }
 
     interpolation(n, polynomials1, polynomials2, triangles_phi, x, y);
@@ -59,6 +70,8 @@ int main(void){
     double d_x = 2 * x / n;
     double d_y = 2 * y / n;
     double x1, y1;
+    x1 = 0;
+    y1 = 0;
     for(int i = 0; i < n; i++){
         for(int j = 0; j < 2 * n; j++){                                           
             k = i * 2 * n + j;
@@ -111,6 +124,7 @@ int main(void){
     }
     delete[] polynomials1;
     delete[] polynomials2;
+    delete[] triangles_phi;
     return 0;
 }
 
@@ -219,6 +233,7 @@ int interpolation(int n, double** coeff, double** storage, double*** triangles_p
                 A[u * 6 + 4] = integral2(triangles_phi[k][u], triangles_phi[k][4], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
                 A[u * 6 + 5] = integral2(triangles_phi[k][u], triangles_phi[k][5], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
                 b[u] = integral2(triangles_phi[k][u], storage[k], b1_x, b2_x, b1_y, b1_y_mult_x, b2_y, b2_y_mult_x);
+                X[u] = 0;
             }
             solver(6, A, b, X);
 
@@ -366,8 +381,6 @@ void psi(double x1, double y1, double x2, double y2, double x0, double y0, doubl
     coeff[0] /= buf;
     coeff[1] /= buf;
     coeff[2] /= buf;
-
-    buf = x0 * coeff[0] + y0 * coeff[1] + coeff[2];
 }
 
 double integral(int pow_x, int pow_y, double b1_x, double b2_x, double b1_y, double b1_y_mult_x, double b2_y, double b2_y_mult_x){ // Интеграл по трапеции x^(pow_x) * y^(pow_y)
