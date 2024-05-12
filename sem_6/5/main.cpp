@@ -40,7 +40,7 @@ int main(void){
     std::ofstream scriptFile("plot_script.gp");
     scriptFile << "set terminal pngcairo enhanced color size 1000,1000\n";
     scriptFile << "set output 'Triangulation.png'\n";
-    scriptFile << "f(x, y) =  (x*y*x*y*x) \n";
+    scriptFile << "f(x, y) =  (x*x*y*x*x*x) \n";
     int k;
     double d_x = 2 * x / n;
     double d_y = 2 * y / n;
@@ -93,7 +93,7 @@ int main(void){
 }
 
 double function(double x, double y){
-    return (x*y*x*y*x);
+    return (x*x*y*x*x*x);
 }
 
 int interpolation(int n, double** coeff, double x, double y){
