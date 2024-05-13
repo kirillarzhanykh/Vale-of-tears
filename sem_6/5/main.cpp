@@ -40,7 +40,7 @@ int main(void){
     std::ofstream scriptFile("plot_script.gp");
     scriptFile << "set terminal pngcairo enhanced color size 1000,1000\n";
     scriptFile << "set output 'Triangulation.png'\n";
-    scriptFile << "f(x, y) =  (x*x*y*x*x*x) \n";
+    scriptFile << "f(x, y) =  (x*x*y)*sin(x*y) \n";
     int k;
     double d_x = 2 * x / n;
     double d_y = 2 * y / n;
@@ -66,6 +66,7 @@ int main(void){
     scriptFile << "set xlabel 'x'\n";
     scriptFile << "set ylabel 'y'\n";
     scriptFile << "set zlabel 'z'\n";
+    scriptFile << "set view 0, 0\n";
     scriptFile << "set xrange[-" << x << ": " << x << "]\n";
     scriptFile << "set yrange[-" << y << ": " << y << "]\n";
     scriptFile << "splot f(x, y) lc rgb 'green' ";
@@ -93,7 +94,7 @@ int main(void){
 }
 
 double function(double x, double y){
-    return (x*x*y*x*x*x);
+    return (x*x*y)*sin(x*y);
 }
 
 int interpolation(int n, double** coeff, double x, double y){
