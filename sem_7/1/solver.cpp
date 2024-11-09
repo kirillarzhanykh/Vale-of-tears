@@ -1,79 +1,155 @@
-#include "solver.hpp"
+#include "solver.h"
 
-// Правая часть уравнения: e^(x^2)
-double ex2(double x) {
-    return exp(x * x);
+double none(double x){
+    return 0;
 }
 
-// Основная функция решения методом конечных разностей
-int SolveFiniteDifference(int N, double* A, double* B, double* u, double* x, double h, double* adjoint) {
-    // Инициализация сетки x
-    for (int i = 0; i < N; ++i) {
-        x[i] = i * h;
-        //std::cout << x[i] << " ";
-    }
-    //std::cout << std::endl;
+double k_func(double x){
+    return 1 + (x > 1/2);
+}
 
-    // Инициализация решения и правой части
-    for (int i = 0; i < N; ++i) {
-        u[i] = 0.0;            // Начальные условия для u
-        B[i] = ex2(x[i]);      // Правая часть системы
+
+
+// Функция правой части системы ОДУ для неоднородного уравнения
+void ODESystemNonHomogeneous(double x, const double y[], double dydx[]) {
+    // y[0] = u
+    // y[1] = u'
+    dydx[0] = y[1];
+    dydx[1] = (y[0] - std::exp(x * x))/k_func(x);
+}
+
+
+
+// Метод Рунге-Кутты второго порядка для системы ОДУ
+void RungeKutta2( double (*func)(double), double h, const double y0[], double x_vals[], double y_vals[], int N_points, int dim) {
+
+    // Инициализация массивов
+    double *y = new double[dim];
+    double *k1 = new double[dim];
+    double *k2 = new double[dim];
+
+    x_vals[0] = 0;
+    for (int j = 0; j < dim; ++j) {
+        y_vals[0 * dim + j] = y0[j];
     }
 
-    // Инициализация матрицы A (нулевая матрица)
-    for (int i = 0; i < N * N; ++i) {
-        A[i] = 0.0;
-    }
+    for (int i = 0; i < N_points - 1; ++i) {
+        
+        for (int j = 0; j < dim; ++j) {
+            y[j] = y_vals[i * dim + j];
+        }
 
-    // Заполняем матрицу A согласно разностной схеме для производных
-    for (int i = 2; i < N - 2; ++i) {
-        A[i * N + (i - 2)] = 1.0 / (h * h * h * h) - 1.0 / (2 * h * h * h);
-        A[i * N + (i - 1)] = -4.0 / (h * h * h * h) + 2.0 / (2 * h * h * h);
-        A[i * N + i] = 6.0 / (h * h * h * h) + sin(x[i]);
-        A[i * N + (i + 1)] = -4.0 / (h * h * h * h) - 2.0 / (2 * h * h * h);
-        A[i * N + (i + 2)] = 1.0 / (h * h * h * h) + 1.0 / (2 * h * h * h);
-    }
+        //ODE(x_vals[i], y, k1);
+        k1[0] = y[1];
+        k1[1] = (y[0] - func(x_vals[i]))/k_func(x_vals[i]);
 
-    // Граничные условия
     
-    // u(0) = 0, u'(0) = 0
-    A[0 * N + 0] = 1.0;
-    A[1 * N + 0] = 1.0 / h;
-    A[1 * N + 1] = -1.0 / h;
+        for (int j = 0; j < dim; ++j) {
+            y[j] += h * k1[j];
+        }
+        //ODE(x_vals[i] + h, y, k2);
+        k1[0] = y[1];
+        k1[1] = (y[0] - func(x_vals[i]))/k_func(x_vals[i]);
 
-    B[0] = 0.0;
-    B[1] = 0.0;
+        for (int j = 0; j < dim; ++j) {
+            y_vals[(i + 1) * dim + j] = y_vals[i * dim + j] + h * 0.5 * (k1[j] + k2[j]);
+            y[j] = y_vals[i * dim + j];
+        }
+    }
 
-    // u(1) = 1, u'(1) = 0
-    A[(N - 1) * N + (N - 1)] = 1.0;
-    A[(N - 2) * N + (N - 1)] = 1.0 / h;
-    A[(N - 2) * N + (N - 2)] = -1.0 / h;
+    // Освобождение памяти
+    delete[] y;
+    delete[] k1;
+    delete[] k2;
+}
 
-    B[N - 1] = 1.0;
-    B[N - 2] = 0.0;
 
-    // Вывод матрицы A
-    //printMatrix(A, N, N);
 
-    // Инверсия матрицы методом отражений
-    int res = ReflectionInverse(N, A, adjoint);
+int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* y_vals, double* x_vals, double* u_vals,double* phi1_full,double* phi2_full,double* psi_full){
+    // Нарезка сетки по x
+    for(int i =0; i< N_points; i++){
+        x_vals[i] = i * h;
+    }
+    
+    // Решение для phi1 (фундаментальное решение 1)
+    double y0_phi1[2] = {1.0, 0.0}; // u(0)=0, u'(0)=0, u''(0)=1, u'''(0)=0
+    RungeKutta2(none, h, y0_phi1, x_vals, y_vals, N_points, dim);
+    
 
-    if (res == -1) {
-        std::cout << "Не существует обратной матрицы" << std::endl;
+    // Сохраняем значения phi1 и phi1'
+    double phi1 = y_vals[(N_points - 1) * dim + 0];
+    double phi1_prime = y_vals[(N_points - 1) * dim + 1];
+    
+    // Сохраняем решение phi1 для дальнейшего использования
+    for (int i = 0; i < N_points; ++i) {
+        for (int j = 0; j < dim; ++j) {
+            phi1_full[i * dim + j] = y_vals[i * dim + j];
+        }
+    }
+
+    // Решение для phi2 (фундаментальное решение 2)
+    double y0_phi2[2] = {0.0, 1.0}; // u(0)=0, u'(0)=0, u''(0)=0, u'''(0)=1
+    RungeKutta2(none, h, y0_phi2, x_vals, y_vals, N_points, dim);
+
+    // Сохраняем значения phi2 и phi2'
+    double phi2 = y_vals[(N_points - 1) * dim + 0];      // y[N][0]
+    double phi2_prime = y_vals[(N_points - 1) * dim + 1]; // y[N][1]
+
+    // Сохраняем решение phi2 для дальнейшего использования
+    for (int i = 0; i < N_points; ++i) {
+        for (int j = 0; j < dim; ++j) {
+            phi2_full[i * dim + j] = y_vals[i * dim + j];
+        }
+    }
+
+    // Решение для psi (частное решение)
+    double y0_psi[2] = {0.0, 0.0}; // u(0)=0, u'(0)=0, u''(0)=0, u'''(0)=0
+    RungeKutta2(func, h, y0_psi, x_vals, y_vals, N_points, dim);
+
+    // Сохраняем значения psi и psi'
+    double psi = y_vals[(N_points - 1) * dim + 0];      // y[N][0]
+    double psi_prime = y_vals[(N_points - 1) * dim + 1]; // y[N][1]
+
+    // Сохраняем решение psi для дальнейшего использования
+
+    for (int i = 0; i < N_points; ++i) {
+        for (int j = 0; j < dim; ++j) {
+            psi_full[i * dim + j] = y_vals[i * dim + j];
+        }
+    }
+    
+    
+
+    // Составляем систему линейных уравнений для нахождения C1 и C2
+    // C1 * phi1(1) + C2 * phi2(1) + psi(1) = 1
+    // C1 * phi1'(1) + C2 * phi2'(1) + psi'(1) = 0
+
+    double b1 = 1.0 - psi;
+    double b2 = 0.0 - psi_prime;
+
+    // Матрица коэффициентов
+    double a11 = phi1;
+    double a12 = phi2;
+    double a21 = phi1_prime;
+    double a22 = phi2_prime;
+
+    // Вычисляем определитель матрицы
+    double det = a11 * a22 - a12 * a21;
+
+    if (std::abs(det) < 1e-16) {
         return -1;
     }
 
-    // Умножение инвертированной матрицы на вектор B для получения u
-    multiplyMatrixByVector(N, adjoint, B, u);
+    // Решаем систему методом Крамера
+    double C1 = (b1 * a22 - b2 * a12) / det;
+    double C2 = (a11 * b2 - a21 * b1) / det;
 
-    // Вывод результатов в файл
-   /* std::ofstream outfile("solution.txt");
-    for (int i = 0; i < N; ++i) {
-        outfile << x[i] << " " << u[i] << std::endl;
+    
+    for (int i = 0; i < N_points; ++i) {
+        u_vals[i] = C1 * phi1_full[i * dim + 0] + C2 * phi2_full[i * dim + 0] + psi_full[i * dim + 0];
     }
-    outfile.close();
 
-    std::cout << "Решение сохранено в файл 'solution.txt'." << std::endl;*/
 
+    
     return 1;
 }
