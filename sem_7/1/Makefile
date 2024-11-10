@@ -13,7 +13,7 @@ SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/solver.cpp
 TARGET = $(BIN_DIR)/solver
 
 # Значения h, для которых будем строить графики и замерять время
-HS = 0.01 0.005 0.0001 0.00005
+HS = 0.01 0.005 0.0001 0.00005 0.000001
 
 # Файл для записи времени выполнения
 TIMING_FILE = timing_results.txt

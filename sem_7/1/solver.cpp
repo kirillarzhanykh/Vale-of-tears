@@ -72,13 +72,13 @@ int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* 
     }
     
     // Решение для phi1 (фундаментальное решение 1)
-    double y0_phi1[2] = {1.0, 0.0}; // u(0)=0, u'(0)=0, u''(0)=1, u'''(0)=0
+    double y0_phi1[2] = {1.0, 0.0}; // u(0)=1, u'(0)=0 
     RungeKutta2(none, h, y0_phi1, x_vals, y_vals, N_points, dim);
     
 
     // Сохраняем значения phi1 и phi1'
-    double phi1 = y_vals[(N_points - 1) * dim + 0];
-    double phi1_prime = y_vals[(N_points - 1) * dim + 1];
+    double phi1_0 = y_vals[0];
+    double phi1_1 = y_vals[(N_points - 1) * dim + 0];
     
     // Сохраняем решение phi1 для дальнейшего использования
     for (int i = 0; i < N_points; ++i) {
@@ -88,12 +88,12 @@ int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* 
     }
 
     // Решение для phi2 (фундаментальное решение 2)
-    double y0_phi2[2] = {0.0, 1.0}; // u(0)=0, u'(0)=0, u''(0)=0, u'''(0)=1
+    double y0_phi2[2] = {0.0, 1.0}; // u(0)=0, u'(0)=1
     RungeKutta2(none, h, y0_phi2, x_vals, y_vals, N_points, dim);
 
     // Сохраняем значения phi2 и phi2'
-    double phi2 = y_vals[(N_points - 1) * dim + 0];      // y[N][0]
-    double phi2_prime = y_vals[(N_points - 1) * dim + 1]; // y[N][1]
+    double phi2_0 = y_vals[0];      // y[0][0]
+    double phi2_1 = y_vals[(N_points - 1) * dim + 0]; // y[N][0]
 
     // Сохраняем решение phi2 для дальнейшего использования
     for (int i = 0; i < N_points; ++i) {
@@ -107,8 +107,8 @@ int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* 
     RungeKutta2(func, h, y0_psi, x_vals, y_vals, N_points, dim);
 
     // Сохраняем значения psi и psi'
-    double psi = y_vals[(N_points - 1) * dim + 0];      // y[N][0]
-    double psi_prime = y_vals[(N_points - 1) * dim + 1]; // y[N][1]
+    double psi_0 = y_vals[0];      // y[0][0]
+    double psi_1 = y_vals[(N_points - 1) * dim + 0]; // y[N][0]
 
     // Сохраняем решение psi для дальнейшего использования
 
@@ -121,17 +121,17 @@ int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* 
     
 
     // Составляем систему линейных уравнений для нахождения C1 и C2
-    // C1 * phi1(1) + C2 * phi2(1) + psi(1) = 1
-    // C1 * phi1'(1) + C2 * phi2'(1) + psi'(1) = 0
+    // C1 * phi1(0) + C2 * phi2(0) + psi(0) = 1
+    // C1 * phi1(1) + C2 * phi2(1) + psi(1) = 0
 
-    double b1 = 1.0 - psi;
-    double b2 = 0.0 - psi_prime;
+    double b1 = 1.0 - psi_0;
+    double b2 = 0.0 - psi_1;
 
     // Матрица коэффициентов
-    double a11 = phi1;
-    double a12 = phi2;
-    double a21 = phi1_prime;
-    double a22 = phi2_prime;
+    double a11 = phi1_0;
+    double a12 = phi2_0;
+    double a21 = phi1_1;
+    double a22 = phi2_1;
 
     // Вычисляем определитель матрицы
     double det = a11 * a22 - a12 * a21;
