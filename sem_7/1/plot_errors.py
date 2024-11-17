@@ -6,7 +6,7 @@ import pandas as pd
 
 def calculate_u_true(x):
     """Вычисляет истинные значения u_true по формуле."""
-    return (1-x)
+    return (1-x**2)
 
 def calculate_errors(x, u, u_true,h):
     """Рассчитывает максимальную и среднеквадратичную ошибки."""

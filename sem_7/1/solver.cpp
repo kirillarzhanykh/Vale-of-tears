@@ -1,5 +1,5 @@
 #include "solver.h"
-#define alpha 10
+#define alpha 1
 
 double none(double x){
     return 0;
@@ -42,19 +42,19 @@ void RungeKutta2( double (*func)(double), double h, const double y0[], double x_
         }
 
         //ODE(x_vals[i], y, k1);
-        k1[0] = y[1];
-        k1[1] = (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
+        k1[0] = h * y[1];
+        k1[1] = h * (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
 
     
         for (int j = 0; j < dim; ++j) {
             y[j] += h * k1[j];
         }
         //ODE(x_vals[i] + h, y, k2);
-        k1[0] = y[1];
-        k1[1] = (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
+        k2[0] = h * y[1];
+        k2[1] = h * (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
 
         for (int j = 0; j < dim; ++j) {
-            y_vals[(i + 1) * dim + j] = y_vals[i * dim + j] + h * 0.5 * (k1[j] + k2[j]);
+            y_vals[(i + 1) * dim + j] = y_vals[i * dim + j] + 0.5 * (k1[j] + k2[j]);
             y[j] = y_vals[i * dim + j];
         }
     }
@@ -64,6 +64,74 @@ void RungeKutta2( double (*func)(double), double h, const double y0[], double x_
     delete[] k1;
     delete[] k2;
 }
+
+// Метод Рунге-Кутты четвертого порядка для системы ОДУ
+void RungeKutta4(double (*func)(double), double h, const double y0[], double x_vals[], double y_vals[], int N_points, int dim) {
+
+    // Инициализация массивов
+    double *y = new double[dim];
+    double *k1 = new double[dim];
+    double *k2 = new double[dim];
+    double *k3 = new double[dim];
+    double *k4 = new double[dim];
+
+    // Начальное значение x
+    x_vals[0] = 0.0;
+    // Установка начальных условий для y
+    for (int j = 0; j < dim; ++j) {
+        y_vals[0 * dim + j] = y0[j];
+    }
+
+    // Основной цикл для всех точек
+    for (int i = 0; i < N_points - 1; ++i) {
+        
+        // Получение текущего значения y
+        for (int j = 0; j < dim; ++j) {
+            y[j] = y_vals[i * dim + j];
+        }
+        // Вычисление k1
+        k1[0] = h * y[1];
+        k1[1] = h * (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
+
+        // Вычисление k2, используя значения x и y, сдвинутые на 0.5 * h
+        double x_half = x_vals[i] + 0.5 * h;
+        for (int j = 0; j < dim; ++j) {
+            y[j] = y_vals[i * dim + j] + 0.5 * k1[j];
+        }
+        k2[0] = h * y[1];
+        k2[1] = h * (alpha*y[0] - func(x_half))/k_func(x_half);
+
+        // Вычисление k3, используя значения x и y, сдвинутые на 0.5 * h
+        for (int j = 0; j < dim; ++j) {
+            y[j] = y_vals[i * dim + j] + 0.5 * k2[j];
+        }
+        k3[0] = h * y[1];
+        k3[1] = h * (alpha*y[0] - func(x_half))/k_func(x_half);
+
+        // Вычисление k4, используя значения x и y, сдвинутые на полный шаг h
+        double x_full = x_vals[i] + h;
+        for (int j = 0; j < dim; ++j) {
+            y[j] = y_vals[i * dim + j] + k3[j];
+        }
+        k4[0] = h * y[1];
+        k4[1] = h * (alpha*y[0] - func(x_full))/k_func(x_full);
+
+        // Обновление значений y_vals с учетом взвешенной суммы коэффициентов
+
+        for (int j = 0; j < dim; ++j) {
+            y_vals[(i + 1) * dim + j] = y_vals[i * dim + j] + (1.0 / 6.0) * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]);
+        }
+
+    }
+
+    // Освобождение памяти
+    delete[] y;
+    delete[] k1;
+    delete[] k2;
+    delete[] k3;
+    delete[] k4;
+}
+
 
 
 

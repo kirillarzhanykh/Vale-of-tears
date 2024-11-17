@@ -11,10 +11,11 @@ k = { 1  при x < 1/2; 2  при x > 1/2 }
 
 #include <cstdlib>        // Для std::stod
 #include <ctime>          // Для измерения времени работы алгоритма
-#include <fstream>        // Для сохранения результатов в файл
+#include <fstream> 
+#include <iomanip>       // Для сохранения результатов в файл
 #include "solver.h"
 
-#define alpha 10
+#define alpha 1
 
 
 using namespace std;
@@ -24,8 +25,7 @@ double ex2(double x) {
 }
 
 double testfunc(double x) {
-    return alpha*(1-x);
-    //return  2*k_func(x) + alpha*(1 -  x*x);
+    return 2*k_func(x) + alpha*(1-x*x);
 }
 
 int main(int argc, char* argv[]) {
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
         ofstream outfile(output_file);
         for (int i = 0; i < n; ++i) {
             //outfile << x_vals[i] << " " << u_vals[i] << endl;
-            outfile << x_vals[i] << " " << u_vals[i]<<" "<< testfunc(x_vals[i]) << endl;
+            outfile <<std::setprecision(10)<< x_vals[i] << " " << u_vals[i]<<" "<< testfunc(x_vals[i]) << endl;
         }
         outfile.close();
         cout << "Решение сохранено в файл " << output_file << endl;
