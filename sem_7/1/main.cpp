@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
         ofstream outfile(output_file);
         for (int i = 0; i < n; ++i) {
             //outfile << x_vals[i] << " " << u_vals[i] << endl;
-            outfile <<std::setprecision(10)<< x_vals[i] << " " << u_vals[i]<<" "<< testfunc(x_vals[i]) << endl;
+            outfile <<std::setprecision(19)<< x_vals[i] << " " << u_vals[i]<<" "<< 1 - x_vals[i]*x_vals[i] << endl;
         }
         outfile.close();
         cout << "Решение сохранено в файл " << output_file << endl;

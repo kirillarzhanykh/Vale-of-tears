@@ -31,7 +31,6 @@ def process_files(folder_path):
         if os.path.isfile(file_path) and filename.endswith('.txt'):
             data = np.loadtxt(file_path)  # Предполагаем, что формат файла простой
             x, u, u_true = data[:, 0], data[:, 1] , data[:, 2]
-            u_true = calculate_u_true(x)
             h = calculate_h(x)
             max_error, mse_error = calculate_errors(x, u, u_true,h)
             
