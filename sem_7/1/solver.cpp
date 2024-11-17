@@ -1,11 +1,13 @@
 #include "solver.h"
+#define alpha 10
 
 double none(double x){
     return 0;
 }
 
 double k_func(double x){
-    return 1 + (x > 1/2);
+    if(x > 1/2) return 2;
+    return 1;
 }
 
 
@@ -15,7 +17,7 @@ void ODESystemNonHomogeneous(double x, const double y[], double dydx[]) {
     // y[0] = u
     // y[1] = u'
     dydx[0] = y[1];
-    dydx[1] = (y[0] - std::exp(x * x))/k_func(x);
+    dydx[1] = (alpha*y[0] - std::exp(x * x))/k_func(x);
 }
 
 
@@ -41,7 +43,7 @@ void RungeKutta2( double (*func)(double), double h, const double y0[], double x_
 
         //ODE(x_vals[i], y, k1);
         k1[0] = y[1];
-        k1[1] = (y[0] - func(x_vals[i]))/k_func(x_vals[i]);
+        k1[1] = (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
 
     
         for (int j = 0; j < dim; ++j) {
@@ -49,7 +51,7 @@ void RungeKutta2( double (*func)(double), double h, const double y0[], double x_
         }
         //ODE(x_vals[i] + h, y, k2);
         k1[0] = y[1];
-        k1[1] = (y[0] - func(x_vals[i]))/k_func(x_vals[i]);
+        k1[1] = (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
 
         for (int j = 0; j < dim; ++j) {
             y_vals[(i + 1) * dim + j] = y_vals[i * dim + j] + h * 0.5 * (k1[j] + k2[j]);

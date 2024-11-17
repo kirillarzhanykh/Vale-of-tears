@@ -1,20 +1,23 @@
 
-import matplotlib.pyplot as plt
+import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 
 def read_solution(filename):
     x_data = []
     u_data = []
     with open(filename, 'r') as file:
         for line in file:
-            x, u = map(float, line.split())
+            # Считываем только первые два столбца x и u, игнорируя третий
+            x, u, _ = map(float, line.split()[:3])
             x_data.append(x)
             u_data.append(u)
     return x_data, u_data
 
 def plot_solution(x_data, u_data, output_image, h):
-    plt.plot(x_data, u_data, color='red', linestyle='-', label=f'Solution for h={h}')
-    plt.scatter(x_data, u_data, color='black', s=10, label='Data points')
+    plt.plot(x_data, u_data, color='black', linestyle='-', label=f'Solution for h={h}')
+    plt.scatter(x_data, u_data, color='red', s=10, label='Data points')
 
     plt.xlabel('x')
     plt.ylabel('u(x)')
@@ -36,4 +39,5 @@ if __name__ == "__main__":
     h = sys.argv[3]
 
     x_data, u_data = read_solution(input_file)
+    
     plot_solution(x_data, u_data, output_image, h)

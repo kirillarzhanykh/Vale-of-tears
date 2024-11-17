@@ -13,8 +13,7 @@ SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/solver.cpp
 TARGET = $(BIN_DIR)/solver
 
 # Значения h, для которых будем строить графики и замерять время
-HS = 0.01 0.005 0.0001 0.00005 0.000001
-
+HS = 0.00016 0.00008 0.00004 0.00002 0.00001
 # Файл для записи времени выполнения
 TIMING_FILE = timing_results.txt
 
@@ -32,8 +31,8 @@ run_all_plots: $(TARGET)
 	@mkdir -p $(IMG_DIR)
 	@echo "h и время выполнения" > $(TIMING_FILE)
 	@for h in $(HS); do \
-		echo "Запуск с шагом $$h и параметром 0..."; \
-		$(TARGET) $$h 1 $(OUT_DIR)/solution_$$h.txt; \
+		echo "Запуск с шагом $$h ..."; \
+		$(TARGET) $$h $(OUT_DIR)/solution_$$h.txt; \
 		python3 plot_solution.py $(OUT_DIR)/solution_$$h.txt $(IMG_DIR)/plot_$$h.png $$h; \
 	done
 	@echo "Графики построены и сохранены в $(IMG_DIR)"
@@ -41,15 +40,6 @@ run_all_plots: $(TARGET)
 	python3 plot_errors.py $(OUT_DIR)
 
 
-
-
-# Запуск программы в тестовом режиме (параметр 1) с фиксированным h = 0.0001
-run_test: $(TARGET)
-	@echo "Запуск программы в тестовом режиме с h = 0.0001 и параметром 1..."
-	$(TARGET) 0.0001 1 $(OUT_DIR)/test_solution.txt
-	python3 plot_solution.py $(OUT_DIR)/test_solution.txt $(IMG_DIR)/test_plot.png 0.0001
-	@echo "График для тестового режима сохранен в $(IMG_DIR)/test_plot.png"
-	
 
 # Очистка всех сгенерированных файлов
 clean:
