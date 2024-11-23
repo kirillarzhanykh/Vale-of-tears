@@ -14,18 +14,29 @@ k = { 1  при x < 1/2; 2  при x > 1/2 }
 #include <fstream> 
 #include <iomanip>       // Для сохранения результатов в файл
 #include "solver.h"
+#include <math.h>
 
-#define alpha 1
+#define alpha 10
 
 
 using namespace std;
+
+double u_func(double x);
 
 double ex2(double x) {
     return exp(x * x);
 }
 
 double testfunc(double x) {
-    return 2*k_func(x) + alpha*(1-x*x);
+    return alpha*(u_func(x));
+}
+
+double u_func(double x) {
+    if (x < 0.5) {
+        return (1-4*x/3);
+    }else{
+        return 2*(1-x)/3;
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -44,7 +55,8 @@ int main(int argc, char* argv[]) {
     
 
     // Определяем количество узлов на сетке
-    int n = static_cast<int>(1.0 / h) + 1;
+    int n = (static_cast<int>(1.0 / h)/2)*2 + 1;
+    h = 1.0 / (n - 1);
     int dim = 2;
     
     // Вывод аргументов
@@ -78,7 +90,7 @@ int main(int argc, char* argv[]) {
         ofstream outfile(output_file);
         for (int i = 0; i < n; ++i) {
             //outfile << x_vals[i] << " " << u_vals[i] << endl;
-            outfile <<std::setprecision(19)<< x_vals[i] << " " << u_vals[i]<<" "<< 1 - x_vals[i]*x_vals[i] << endl;
+            outfile <<std::setprecision(19)<< x_vals[i] << " " << u_vals[i] <<" "<< u_func(x_vals[i]) << endl;
         }
         outfile.close();
         cout << "Решение сохранено в файл " << output_file << endl;
