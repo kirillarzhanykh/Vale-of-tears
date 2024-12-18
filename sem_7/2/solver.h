@@ -1,15 +1,28 @@
+
 #include <iostream>
 #include <cmath>
-#include <fstream>
+#include <vector>
+#include <iomanip>
 
+double diff_system(int i, double t, double x1, double x2, double p1, double p2, double alpha);
 
-double none(double x);
+void Runge_Kutta(int n, double* x1, double* x2, double* p1, double* p2, double x1_0, double x2_0, double p1_0, double p2_0, double alpha, double h);
 
-double k_func(double x);
+void Runge_Kutta4_Adaptive(int n, double* x1, double* x2, double* p1, double* p2,
+                           double x1_0, double x2_0, double p1_0, double p2_0,
+                      double alpha, double& h, double t_end, double tol);
 
-void RungeKutta2( double (*func)(double), double h, const double y0[], double x_vals[], double y_vals[], int N_points, int dim);
+void system(const double *x, double *dxdt, double t, double alpha);
 
-void RungeKutta4( double (*func)(double), double h, const double y0[], double x_vals[], double y_vals[], int N_points, int dim);
+void Runge_Kutta4(int n, double *x1, double *x2, double *p1, double *p2,double x1_0, double x2_0, double p1_0, double p2_0, double alpha, double h);
+void Runge_Kutta5(int n, double *x1, double *x2, double *p1, double *p2,
+                  double x1_0, double x2_0, double p1_0, double p2_0,
+                  double alpha, double h);
+void Shouter_cond(double a, double b, int n, double* x1, double* x2, double* p1, double* p2, double alpha, double h, double& F1, double& F2);
 
-int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* y_vals, double* x_vals, double* u_vals,double* phi1_full,double* phi2_full,double* psi_full);
+void Secant(double* ab, double W[2][2], double F_prev[2], int n, double* x1, double* x2, double* p1, double* p2, double alpha, double h);
+
+void find_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p1, double* p2, double h);
+
+void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p1, double* p2, double h);
 

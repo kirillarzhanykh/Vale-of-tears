@@ -1,166 +1,193 @@
+
 #include "solver.h"
-#define alpha 10
 
-
-// Функция правой части системы ОДУ для неоднородного уравнения
-void ODESystemNonHomogeneous(double x, const double y[], double dydx[]) {
-    // y[0] = u
-    // y[1] = u'
-    dydx[0] = y[1];
-    dydx[1] = (alpha*y[0] - std::exp(x * x))/k_func(x);
+// Функция системы уравнений
+void system(const double *x, double *dxdt, double t, double alpha) {
+    //x[1] = x2  x[0] = x1 x[3] = p2 x[2] = p1
+    dxdt[0] = x[1]; 
+    dxdt[1] = x[3] + x[0] * std::exp(-alpha * x[0]); 
+    dxdt[2] =  x[3] * std::exp(-alpha * x[0]) * (alpha * x[0] - 1.0);
+    dxdt[3] = -x[2]; 
 }
 
-// Метод Рунге-Кутты четвертого порядка для системы ОДУ
-void RungeKutta4(double (*func)(double), double h, const double y0[], double x_vals[], double y_vals[], int N_points, int dim) {
 
-    // Инициализация массивов
-    double *y = new double[dim];
-    double *k1 = new double[dim];
-    double *k2 = new double[dim];
-    double *k3 = new double[dim];
-    double *k4 = new double[dim];
 
-    // Начальное значение x
-    x_vals[0] = 0.0;
-    // Установка начальных условий для y
-    for (int j = 0; j < dim; ++j) {
-        y_vals[0 * dim + j] = y0[j];
+
+// Метод Рунге-Кутты 4-го порядка
+void Runge_Kutta4(int n, double *x1, double *x2, double *p1, double *p2,
+                 double x1_0, double x2_0, double p1_0, double p2_0,
+                 double alpha, double h) {
+    double k1[4], k2[4], k3[4], k4[4];
+    double state[4], temp_state[4];
+
+    x1[0] = x1_0;
+    x2[0] = x2_0;
+    p1[0] = p1_0;
+    p2[0] = p2_0;
+
+    double t_i = 0.0;
+
+    for (int i = 1; i < n ; i++) {
+        state[0] = x1[i - 1];
+        state[1] = x2[i - 1];
+        state[2] = p1[i - 1];
+        state[3] = p2[i - 1];
+
+        
+        system(state, k1, t_i, alpha);
+
+       
+        for (int j = 0; j < 4; ++j) {
+            temp_state[j] = state[j] + k1[j] * h / 2.0;
+        }
+        system(temp_state, k2, t_i + h / 2.0, alpha);
+
+       
+        for (int j = 0; j < 4; ++j) {
+            temp_state[j] = state[j] + k2[j] * h / 2.0;
+        }
+        system(temp_state, k3, t_i + h / 2.0, alpha);
+
+        // Вычисление k4
+        for (int j = 0; j < 4; ++j) {
+            temp_state[j] = state[j] + k3[j] * h;
+        }
+        system(temp_state, k4, t_i + h, alpha);
+
+        // Обновление переменных
+        x1[i] = x1[i - 1] + h * (k1[0] + 2.0 * k2[0] + 2.0 * k3[0] + k4[0]) / 6.0;
+        x2[i] = x2[i - 1] + h * (k1[1] + 2.0 * k2[1] + 2.0 * k3[1] + k4[1]) / 6.0;
+        p1[i] = p1[i - 1] + h * (k1[2] + 2.0 * k2[2] + 2.0 * k3[2] + k4[2]) / 6.0;
+        p2[i] = p2[i - 1] + h * (k1[3] + 2.0 * k2[3] + 2.0 * k3[3] + k4[3]) / 6.0;
+
+        t_i += h;
     }
-
-    // Основной цикл для всех точек
-    for (int i = 0; i < N_points - 1; ++i) {
-
-        // Получение текущего значения y
-        for (int j = 0; j < dim; ++j) {
-            y[j] = y_vals[i * dim + j];
-        }
-        // Вычисление k1
-        k1[0] = h * y[1];
-        k1[1] = h * (alpha*y[0] - func(x_vals[i]))/k_func(x_vals[i]);
-
-        // Вычисление k2, используя значения x и y, сдвинутые на 0.5 * h
-        double x_half = x_vals[i] + 0.5 * h;
-        for (int j = 0; j < dim; ++j) {
-            y[j] = y_vals[i * dim + j] + 0.5 * k1[j];
-        }
-        k2[0] = h * y[1];
-        k2[1] = h * (alpha*y[0] - func(x_half))/k_func(x_half);
-
-        // Вычисление k3, используя значения x и y, сдвинутые на 0.5 * h
-        for (int j = 0; j < dim; ++j) {
-            y[j] = y_vals[i * dim + j] + 0.5 * k2[j];
-        }
-        k3[0] = h * y[1];
-        k3[1] = h * (alpha*y[0] - func(x_half))/k_func(x_half);
-
-        // Вычисление k4, используя значения x и y, сдвинутые на полный шаг h
-        double x_full = x_vals[i] + h;
-        for (int j = 0; j < dim; ++j) {
-            y[j] = y_vals[i * dim + j] + k3[j];
-        }
-        k4[0] = h * y[1];
-        k4[1] = h * (alpha*y[0] - func(x_full))/k_func(x_full);
-
-        // Обновление значений y_vals с учетом взвешенной суммы коэффициентов
-
-        for (int j = 0; j < dim; ++j) {
-            y_vals[(i + 1) * dim + j] = y_vals[i * dim + j] + (1.0 / 6.0) * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j]);
-        }
-
-    }
-
-    // Освобождение памяти
-    delete[] y;
-    delete[] k1;
-    delete[] k2;
-    delete[] k3;
-    delete[] k4;
 }
 
-int ShooterMethod(double (*func)(double),int N_points,int dim,double h, double* y_vals, double* x_vals, double* u_vals,double* phi1_full,double* phi2_full,double* psi_full){
-    // Нарезка сетки по x
-    for(int i =0; i< N_points; i++){
-        x_vals[i] = i * h;
-    }
+
+void Shooter_cond(double a, double b, int n, double* x1, double* x2, double* p1, double* p2, double alpha, double h, double& F1, double& F2) {
+    Runge_Kutta4(n, x1, x2, p1, p2, 0.0, 0.0 , a, b, alpha, h);
+    //std::cout<<"2"<<std::endl;
+    F1 = x1[n - 1] - std::sinh(1); // λ1(T)
+    F2 = x2[n - 1] - std::exp(1); // λ2(T)
     
-    // Решение для phi1 (фундаментальное решение 1)
-    double y0_phi1[2] = {1.0, 0.0}; // u(0)=1, u'(0)=0 
-    RungeKutta2(none, h, y0_phi1, x_vals, y_vals, N_points, dim);
-    
-
-    // Сохраняем значения phi1 и phi1'
-    double phi1_0 = y_vals[0];
-    double phi1_1 = y_vals[(N_points - 1) * dim + 0];
-    
-    // Сохраняем решение phi1 для дальнейшего использования
-    for (int i = 0; i < N_points; ++i) {
-        for (int j = 0; j < dim; ++j) {
-            phi1_full[i * dim + j] = y_vals[i * dim + j];
-        }
-    }
-
-    // Решение для phi2 (фундаментальное решение 2)
-    double y0_phi2[2] = {0.0, 1.0}; // u(0)=0, u'(0)=1
-    RungeKutta2(none, h, y0_phi2, x_vals, y_vals, N_points, dim);
-
-    // Сохраняем значения phi2 и phi2'
-    double phi2_0 = y_vals[0];      // y[0][0]
-    double phi2_1 = y_vals[(N_points - 1) * dim + 0]; // y[N][0]
-
-    // Сохраняем решение phi2 для дальнейшего использования
-    for (int i = 0; i < N_points; ++i) {
-        for (int j = 0; j < dim; ++j) {
-            phi2_full[i * dim + j] = y_vals[i * dim + j];
-        }
-    }
-
-    // Решение для psi (частное решение)
-    double y0_psi[2] = {0.0, 0.0}; // u(0)=0, u'(0)=0, u''(0)=0, u'''(0)=0
-    RungeKutta2(func, h, y0_psi, x_vals, y_vals, N_points, dim);
-
-    // Сохраняем значения psi и psi'
-    double psi_0 = y_vals[0];      // y[0][0]
-    double psi_1 = y_vals[(N_points - 1) * dim + 0]; // y[N][0]
-
-    // Сохраняем решение psi для дальнейшего использования
-
-    for (int i = 0; i < N_points; ++i) {
-        for (int j = 0; j < dim; ++j) {
-            psi_full[i * dim + j] = y_vals[i * dim + j];
-        }
-    }
-    
-    
-
-    // Составляем систему линейных уравнений для нахождения C1 и C2
-    // C1 * phi1(0) + C2 * phi2(0) + psi(0) = 1
-    // C1 * phi1(1) + C2 * phi2(1) + psi(1) = 0
-
-    double b1 = 1.0 - psi_0;
-    double b2 = 0.0 - psi_1;
-
-    // Матрица коэффициентов
-    double a11 = phi1_0;
-    double a12 = phi2_0;
-    double a21 = phi1_1;
-    double a22 = phi2_1;
-
-    // Вычисляем определитель матрицы
-    double det = a11 * a22 - a12 * a21;
-
-    if (std::abs(det) < 1e-16) {
-        return -1;
-    }
-
-    // Решаем систему методом Крамера
-    double C1 = (b1 * a22 - b2 * a12) / det;
-    double C2 = (a11 * b2 - a21 * b1) / det;
-
-    
-    for (int i = 0; i < N_points; ++i) {
-        u_vals[i] = C1 * phi1_full[i * dim + 0] + C2 * phi2_full[i * dim + 0] + psi_full[i * dim + 0];
-    }
-
-    
-    return 1;
 }
+
+
+
+double norma_fedor(int n, double *F, double *fedot_temp) {
+    double res = 0.0;
+    for (int i = 0; i < n; i++) {
+        //std::cout<< std::setprecision(10) <<"F[i]: "<<  F[i] << std::endl;
+
+        res += (F[i] * F[i]) / fedot_temp[i];
+    }
+    return sqrt(res);
+}
+
+
+void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p1, double* p2, double h) {
+    
+    const double eps = 1e-15;   // Точность остановки
+    const double delta = 1e-10; // Шаг для конечных разностей
+    double W[2][2];             // Матрица Якобиана
+    double F[2];                // Значения функций в текущих точках
+    double F_temp_plus[2], F_temp_minus[2]; // Временные значения для центральных разностей
+    double delta_ab[2];         // Приращения для ab
+    double fedot_temp[2];            // Массив для нормировки по Федоренко
+
+    // Инициализация начальных приближений
+    //ab[0] = -1.22565282; // Начальное значение a
+    ab[0] = -1.22565282;
+    ab[1] = -0.274772802 * 2; // Начальное значение b
+
+
+    
+    // Вычисляем начальные значения функций
+    Shooter_cond(ab[0], ab[1], n, x1, x2, p1, p2, alpha, h, F[0], F[1]);
+    
+    double norm_fedor = norma_fedor(2, F, fedot_temp);
+    
+    //std::cout<<norm_fedor<<std::endl;
+    
+    double a_orig = ab[0];
+    double b_orig = ab[1];
+
+    // Вычисляем Якобиан по a
+    ab[0] = a_orig + delta;
+    Shooter_cond(ab[0], b_orig, n, x1, x2, p1, p2, alpha, h, F_temp_plus[0], F_temp_plus[1]);
+
+    ab[0] = a_orig - delta;
+    Shooter_cond(ab[0], b_orig, n, x1, x2, p1, p2, alpha, h, F_temp_minus[0], F_temp_minus[1]);
+
+    W[0][0] = (F_temp_plus[0] - F_temp_minus[0]) / (2.0 * delta);
+    W[1][0] = (F_temp_plus[1] - F_temp_minus[1]) / (2.0 * delta);
+
+    ab[0] = a_orig; // Возвращаемся к исходному a
+
+    // Вычисляем Якобиан по b
+    ab[1] = b_orig + delta;
+    Shooter_cond(a_orig, ab[1], n, x1, x2, p1, p2, alpha, h, F_temp_plus[0], F_temp_plus[1]);
+
+    ab[1] = b_orig - delta;
+    Shooter_cond(a_orig, ab[1], n, x1, x2, p1, p2, alpha, h, F_temp_minus[0], F_temp_minus[1]);
+
+    W[0][1] = (F_temp_plus[0] - F_temp_minus[0]) / (2.0 * delta);
+    W[1][1] = (F_temp_plus[1] - F_temp_minus[1]) / (2.0 * delta);
+
+    ab[1] = b_orig; // Возвращаемся к исходному b
+
+    // Итерационный процесс метода Ньютона
+    while (true) {
+        // Вычисляем детерминант Якобиана
+        double det = W[0][0] * W[1][1] - W[0][1] * W[1][0];
+        if (fabs(det) < 1e-32) {
+            std::cerr << "Детерминант Якобиана равен нулю, не можем продолжить." << std::endl;
+            break;
+        }
+        
+        // Вычисляем приращения delta_ab
+        delta_ab[0] = (-F[0] * W[1][1] + F[1] * W[0][1]) / det;
+        delta_ab[1] = (W[0][0] * -F[1] + W[1][0] * F[0]) / det;
+        
+        // Обновляем значения ab
+        ab[0] += delta_ab[0];
+        ab[1] += delta_ab[1];
+        
+        // Сохраняем старое F
+        double F_old[2] = {F[0], F[1]};
+        
+
+        Shooter_cond(ab[0], ab[1], n, x1, x2, p1, p2, alpha, h, F[0], F[1]);
+        
+        
+        for (int i = 0; i < 2; i++) {
+            fedot_temp[i] = 0.0;
+            for (int j = 0; j < 2; j++) {
+                fedot_temp[i] += W[i][j] * W[i][j];
+            }
+        }
+        
+        // Вычисляем норму по Федоренко
+        norm_fedor = norma_fedor(2, F, fedot_temp);
+        //std::cout<<norm_fedor<<std::endl;
+        // Проверяем условие остановки по норме Федоренко
+        if (norm_fedor < eps) {
+            std::cout<<norm_fedor<<std::endl;
+            break;
+        }
+        
+        // Обновление Якобиана по Федоренко
+        double y[2] = {F[0] - F_old[0], F[1] - F_old[1]};
+        double s[2] = {delta_ab[0], delta_ab[1]};
+        double s_dot_s = s[0] * s[0] + s[1] * s[1];
+        
+        for (int i = 0; i < 2; ++i) {
+            double diff = y[i] - (W[i][0] * s[0] + W[i][1] * s[1]);
+            for (int j = 0; j < 2; ++j) {
+                W[i][j] += (diff * s[j]) / s_dot_s;
+            }
+        }
+    }
+}
+
