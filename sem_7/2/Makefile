@@ -6,11 +6,10 @@ CXXFLAGS = -std=c++11
 SOURCES = main.cpp solver.cpp
 HEADERS = solver.h
 EXECUTABLE = executor
+OUT_DIR = ./solutions
+IMG_DIR = ./images
 
-# Значения h для анализа сходимости
-#HS = 0.01 0.005 0.0025 0.001
-#HS =  0.1 0.05 0.025 0.001
-HS =   0.0001
+HS =   0.000001
 
 # Цель по умолчанию
 all: run
@@ -25,8 +24,10 @@ run: $(EXECUTABLE)
 		echo "Запуск программы с h = $$h"; \
 		./$(EXECUTABLE) $$h; \
 	done
+	
 
 # Правило для очистки
 clean:
 	rm -f $(EXECUTABLE)
 	rm -rf solutions
+

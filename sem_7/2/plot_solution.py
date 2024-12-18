@@ -5,22 +5,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_solution(filename):
+    t_data = []
     x_data = []
     u_data = []
     with open(filename, 'r') as file:
         for line in file:
-            # Считываем только первые два столбца x и u, игнорируя третий
-            x, u, _ = map(float, line.split()[:3])
+            t, x, x2, p1, p2, u = map(float, line.split()[:6])
+            t_data.append(t)
             x_data.append(x)
             u_data.append(u)
-    return x_data, u_data
+    return t_data, x_data, u_data
 
-def plot_solution(x_data, u_data, output_image, h):
-    plt.plot(x_data, u_data, color='black', linestyle='-', label=f'Solution for h={h}')
-    plt.scatter(x_data, u_data, color='red', s=10, label='Data points')
+def plot_solution(t_data, x_data, u_data, output_image, h):
+    plt.plot(t_data, x_data, color='black', linestyle='-', label=f'x(t) for h={h}')
+    plt.scatter(t_data, x_data, color='red', s=10, label='Data points')
 
-    plt.xlabel('x')
-    plt.ylabel('u(x)')
+    plt.plot(t_data, u_data, color='green', linestyle='-', label=f'u(t) for h={h}')
+    plt.scatter(t_data, u_data, color='yellow', s=10, label='Data points')
+
+    plt.xlabel('t')
+    plt.ylabel('x(t), u(t)')
     plt.title(f'Solution with h={h}')
     plt.legend()
     plt.grid(True)
@@ -38,6 +42,6 @@ if __name__ == "__main__":
     output_image = sys.argv[2]
     h = sys.argv[3]
 
-    x_data, u_data = read_solution(input_file)
+    t_data, x_data, u_data = read_solution(input_file)
     
-    plot_solution(x_data, u_data, output_image, h)
+    plot_solution(t_data, x_data, u_data, output_image, h)

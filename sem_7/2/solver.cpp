@@ -16,7 +16,7 @@ void system(const double *x, double *dxdt, double t, double alpha) {
 // Метод Рунге-Кутты 4-го порядка
 void Runge_Kutta4(int n, double *x1, double *x2, double *p1, double *p2,
                  double x1_0, double x2_0, double p1_0, double p2_0,
-                 double alpha, double h) {
+                 double alpha, double h, double *u) {
     double k1[4], k2[4], k3[4], k4[4];
     double state[4], temp_state[4];
 
@@ -61,15 +61,16 @@ void Runge_Kutta4(int n, double *x1, double *x2, double *p1, double *p2,
         p2[i] = p2[i - 1] + h * (k1[3] + 2.0 * k2[3] + 2.0 * k3[3] + k4[3]) / 6.0;
 
         t_i += h;
+
+        u[i] = p1[i] * std::exp(-alpha * x1[i]) * (alpha * x1[i] - 1.0) - x1[i] * std::exp(-alpha * x1[i]);
     }
 }
 
 
-void Shooter_cond(double a, double b, int n, double* x1, double* x2, double* p1, double* p2, double alpha, double h, double& F1, double& F2) {
-    Runge_Kutta4(n, x1, x2, p1, p2, 0.0, 0.0 , a, b, alpha, h);
-    //std::cout<<"2"<<std::endl;
-    F1 = x1[n - 1] - std::sinh(1); // λ1(T)
-    F2 = x2[n - 1] - std::exp(1); // λ2(T)
+void Shooter_cond(double a, double b, int n, double* x1, double* x2, double* p1, double* p2, double alpha, double h, double& F1, double& F2, double *u) {
+    Runge_Kutta4(n, x1, x2, p1, p2, 0.0, 0.0 , a, b, alpha, h, u);
+    F1 = x1[n - 1] - std::sinh(1);
+    F2 = x2[n - 1] - std::exp(1); 
     
 }
 
@@ -78,7 +79,6 @@ void Shooter_cond(double a, double b, int n, double* x1, double* x2, double* p1,
 double norma_fedor(int n, double *F, double *fedot_temp) {
     double res = 0.0;
     for (int i = 0; i < n; i++) {
-        //std::cout<< std::setprecision(10) <<"F[i]: "<<  F[i] << std::endl;
 
         res += (F[i] * F[i]) / fedot_temp[i];
     }
@@ -86,7 +86,7 @@ double norma_fedor(int n, double *F, double *fedot_temp) {
 }
 
 
-void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p1, double* p2, double h) {
+void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p1, double* p2, double h, double* u) {
     
     const double eps = 1e-15;   // Точность остановки
     const double delta = 1e-10; // Шаг для конечных разностей
@@ -96,15 +96,11 @@ void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p
     double delta_ab[2];         // Приращения для ab
     double fedot_temp[2];            // Массив для нормировки по Федоренко
 
-    // Инициализация начальных приближений
-    //ab[0] = -1.22565282; // Начальное значение a
-    ab[0] = -1.22565282;
-    ab[1] = -0.274772802 * 2; // Начальное значение b
+    ab[0] = 0;
+    ab[1] = 2; 
 
-
-    
     // Вычисляем начальные значения функций
-    Shooter_cond(ab[0], ab[1], n, x1, x2, p1, p2, alpha, h, F[0], F[1]);
+    Shooter_cond(ab[0], ab[1], n, x1, x2, p1, p2, alpha, h, F[0], F[1], u);
     
     double norm_fedor = norma_fedor(2, F, fedot_temp);
     
@@ -115,10 +111,10 @@ void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p
 
     // Вычисляем Якобиан по a
     ab[0] = a_orig + delta;
-    Shooter_cond(ab[0], b_orig, n, x1, x2, p1, p2, alpha, h, F_temp_plus[0], F_temp_plus[1]);
+    Shooter_cond(ab[0], b_orig, n, x1, x2, p1, p2, alpha, h, F_temp_plus[0], F_temp_plus[1], u);
 
     ab[0] = a_orig - delta;
-    Shooter_cond(ab[0], b_orig, n, x1, x2, p1, p2, alpha, h, F_temp_minus[0], F_temp_minus[1]);
+    Shooter_cond(ab[0], b_orig, n, x1, x2, p1, p2, alpha, h, F_temp_minus[0], F_temp_minus[1], u);
 
     W[0][0] = (F_temp_plus[0] - F_temp_minus[0]) / (2.0 * delta);
     W[1][0] = (F_temp_plus[1] - F_temp_minus[1]) / (2.0 * delta);
@@ -127,10 +123,10 @@ void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p
 
     // Вычисляем Якобиан по b
     ab[1] = b_orig + delta;
-    Shooter_cond(a_orig, ab[1], n, x1, x2, p1, p2, alpha, h, F_temp_plus[0], F_temp_plus[1]);
+    Shooter_cond(a_orig, ab[1], n, x1, x2, p1, p2, alpha, h, F_temp_plus[0], F_temp_plus[1], u);
 
     ab[1] = b_orig - delta;
-    Shooter_cond(a_orig, ab[1], n, x1, x2, p1, p2, alpha, h, F_temp_minus[0], F_temp_minus[1]);
+    Shooter_cond(a_orig, ab[1], n, x1, x2, p1, p2, alpha, h, F_temp_minus[0], F_temp_minus[1], u);
 
     W[0][1] = (F_temp_plus[0] - F_temp_minus[0]) / (2.0 * delta);
     W[1][1] = (F_temp_plus[1] - F_temp_minus[1]) / (2.0 * delta);
@@ -158,7 +154,7 @@ void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p
         double F_old[2] = {F[0], F[1]};
         
 
-        Shooter_cond(ab[0], ab[1], n, x1, x2, p1, p2, alpha, h, F[0], F[1]);
+        Shooter_cond(ab[0], ab[1], n, x1, x2, p1, p2, alpha, h, F[0], F[1], u);
         
         
         for (int i = 0; i < 2; i++) {
@@ -173,7 +169,7 @@ void solve_ab(int n, double alpha, double* ab, double* x1, double* x2, double* p
         //std::cout<<norm_fedor<<std::endl;
         // Проверяем условие остановки по норме Федоренко
         if (norm_fedor < eps) {
-            std::cout<<norm_fedor<<std::endl;
+            //std::cout<<norm_fedor<<std::endl;
             break;
         }
         
